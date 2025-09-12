@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Add Pet Listing - Pet Care Connect{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">
+                    <i class="fas fa-home me-2"></i>Add Pet for Adoption
+                </h2>
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.pet_name.label(class="form-label") }}
+                                {{ form.pet_name(class="form-control") }}
+                                {% if form.pet_name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.pet_name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.breed.label(class="form-label") }}
+                                {{ form.breed(class="form-control") }}
+                                {% if form.breed.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.breed.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.age.label(class="form-label") }}
+                                {{ form.age(class="form-control") }}
+                                <small class="form-text text-muted">Age in months</small>
+                                {% if form.age.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.age.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.gender.label(class="form-label") }}
+                                {{ form.gender(class="form-select") }}
+                                {% if form.gender.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.gender.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.size.label(class="form-label") }}
+                                {{ form.size(class="form-select") }}
+                                {% if form.size.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.size.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.description.label(class="form-label") }}
+                        {{ form.description(class="form-control", rows="4") }}
+                        <small class="form-text text-muted">Describe the pet's personality, behavior, and special needs</small>
+                        {% if form.description.errors %}
+                            <div class="text-danger">
+                                {% for error in form.description.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.vaccination_status.label(class="form-label") }}
+                                {{ form.vaccination_status(class="form-control") }}
+                                {% if form.vaccination_status.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.vaccination_status.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.adoption_fee.label(class="form-label") }}
+                                {{ form.adoption_fee(class="form-control", step="0.01") }}
+                                <small class="form-text text-muted">Leave blank for no fee</small>
+                                {% if form.adoption_fee.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.adoption_fee.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.photo.label(class="form-label") }}
+                        {{ form.photo(class="form-control") }}
+                        {% if form.photo.errors %}
+                            <div class="text-danger">
+                                {% for error in form.photo.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="mb-3">Pet Characteristics</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                {{ form.spayed_neutered(class="form-check-input") }}
+                                {{ form.spayed_neutered.label(class="form-check-label") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                {{ form.good_with_kids(class="form-check-input") }}
+                                {{ form.good_with_kids.label(class="form-check-label") }}
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-check mb-3">
+                                {{ form.good_with_pets(class="form-check-input") }}
+                                {{ form.good_with_pets.label(class="form-check-label") }}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('agency_dashboard') }}" class="btn btn-secondary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-home me-2"></i>Add Listing
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

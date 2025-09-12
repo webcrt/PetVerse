@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block title %}Pet Owner Dashboard - Pet Care Connect{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-tachometer-alt me-2"></i>Welcome back, {{ user.name }}!
+        </h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card stats-card text-center">
+            <div class="card-body">
+                <i class="fas fa-paw stats-icon"></i>
+                <h3 class="mt-2">{{ pets|length }}</h3>
+                <p class="mb-0">Your Pets</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                <h5>AI Pet Care</h5>
+                <a href="{{ url_for('chatbot') }}" class="btn btn-primary">
+                    <i class="fas fa-comments me-2"></i>Ask Assistant
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-plus-circle fa-3x text-success mb-3"></i>
+                <h5>Add New Pet</h5>
+                <a href="{{ url_for('add_pet') }}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Add Pet
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-search fa-3x text-info mb-3"></i>
+                <h5>Browse Pets</h5>
+                <a href="{{ url_for('browse_pets') }}" class="btn btn-info">
+                    <i class="fas fa-eye me-2"></i>Browse
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <h3 class="mb-3">
+            <i class="fas fa-paw me-2"></i>Your Pets
+        </h3>
+    </div>
+</div>
+
+{% if pets %}
+<div class="row">
+    {% for pet in pets %}
+    <div class="col-md-4 mb-4">
+        <div class="card pet-card">
+            {% if pet.photo_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + pet.photo_filename) }}" 
+                     class="card-img-top pet-image" alt="{{ pet.name }}">
+            {% else %}
+                <div class="card-img-top pet-image bg-light d-flex align-items-center justify-content-center">
+                    <i class="fas fa-paw fa-3x text-muted"></i>
+                </div>
+            {% endif %}
+            <div class="card-body">
+                <h5 class="card-title">{{ pet.name }}</h5>
+                <p class="card-text">
+                    <strong>Breed:</strong> {{ pet.breed }}<br>
+                    <strong>Age:</strong> {{ pet.age }} months<br>
+                    <strong>Gender:</strong> {{ pet.gender.title() }}
+                </p>
+                <div class="btn-group w-100">
+                    <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#petModal{{ pet.id }}">
+                        <i class="fas fa-eye me-1"></i>View
+                    </button>
+                    <a href="{{ url_for('edit_pet', pet_id=pet.id) }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-edit me-1"></i>Edit
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Pet Details Modal -->
+    <div class="modal fade" id="petModal{{ pet.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ pet.name }} - Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% if pet.photo_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + pet.photo_filename) }}" 
+                             class="img-fluid mb-3 rounded" alt="{{ pet.name }}">
+                    {% endif %}
+                    <p><strong>Breed:</strong> {{ pet.breed }}</p>
+                    <p><strong>Age:</strong> {{ pet.age }} months</p>
+                    <p><strong>Gender:</strong> {{ pet.gender.title() }}</p>
+                    {% if pet.weight %}
+                        <p><strong>Weight:</strong> {{ pet.weight }} kg</p>
+                    {% endif %}
+                    {% if pet.medical_history %}
+                        <p><strong>Medical History:</strong><br>{{ pet.medical_history }}</p>
+                    {% endif %}
+                    {% if pet.feeding_schedule %}
+                        <p><strong>Feeding Schedule:</strong><br>{{ pet.feeding_schedule }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-paw fa-5x text-muted mb-4"></i>
+    <h4>No pets added yet</h4>
+    <p class="text-muted">Add your first pet to get started with managing their care!</p>
+    <a href="{{ url_for('add_pet') }}" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus me-2"></i>Add Your First Pet
+    </a>
+</div>
+{% endif %}
+{% endblock %}

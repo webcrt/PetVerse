@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Add Pet - Pet Care Connect{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+                <h2 class="card-title text-center mb-4">
+                    <i class="fas fa-paw me-2"></i>Add Your Pet
+                </h2>
+                
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-control") }}
+                                {% if form.name.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.name.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.breed.label(class="form-label") }}
+                                {{ form.breed(class="form-control") }}
+                                {% if form.breed.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.breed.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.age.label(class="form-label") }}
+                                {{ form.age(class="form-control") }}
+                                <small class="form-text text-muted">Age in months</small>
+                                {% if form.age.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.age.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.gender.label(class="form-label") }}
+                                {{ form.gender(class="form-select") }}
+                                {% if form.gender.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.gender.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                {{ form.weight.label(class="form-label") }}
+                                {{ form.weight(class="form-control", step="0.1") }}
+                                <small class="form-text text-muted">Weight in kg</small>
+                                {% if form.weight.errors %}
+                                    <div class="text-danger">
+                                        {% for error in form.weight.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.photo.label(class="form-label") }}
+                        {{ form.photo(class="form-control") }}
+                        {% if form.photo.errors %}
+                            <div class="text-danger">
+                                {% for error in form.photo.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.medical_history.label(class="form-label") }}
+                        {{ form.medical_history(class="form-control", rows="4") }}
+                        <small class="form-text text-muted">Include vaccination records, allergies, current medications, etc.</small>
+                        {% if form.medical_history.errors %}
+                            <div class="text-danger">
+                                {% for error in form.medical_history.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        {{ form.feeding_schedule.label(class="form-label") }}
+                        {{ form.feeding_schedule(class="form-control", rows="3") }}
+                        <small class="form-text text-muted">Example: Morning 7AM - 1 cup dry food, Evening 6PM - 1 cup dry food + treats</small>
+                        {% if form.feeding_schedule.errors %}
+                            <div class="text-danger">
+                                {% for error in form.feeding_schedule.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('pet_owner_dashboard') }}" class="btn btn-secondary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="fas fa-paw me-2"></i>Add Pet
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

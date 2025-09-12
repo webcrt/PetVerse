@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Pets for Adoption - Pet Care Connect{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-search me-2"></i>Find Your Perfect Pet
+        </h2>
+    </div>
+</div>
+
+<!-- Filter Section -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label for="breed" class="form-label">Breed</label>
+                <input type="text" class="form-control" id="breed" name="breed" 
+                       value="{{ breed_filter }}" placeholder="Enter breed (e.g., Golden Retriever)">
+            </div>
+            <div class="col-md-4">
+                <label for="size" class="form-label">Size</label>
+                <select class="form-select" id="size" name="size">
+                    <option value="">All Sizes</option>
+                    <option value="small" {% if size_filter == 'small' %}selected{% endif %}>Small (under 10kg)</option>
+                    <option value="medium" {% if size_filter == 'medium' %}selected{% endif %}>Medium (10-25kg)</option>
+                    <option value="large" {% if size_filter == 'large' %}selected{% endif %}>Large (over 25kg)</option>
+                </select>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search me-2"></i>Filter
+                </button>
+                <a href="{{ url_for('browse_pets') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Clear
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Results Section -->
+{% if listings.items %}
+<div class="row">
+    {% for listing in listings.items %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card pet-card h-100">
+            {% if listing.photo_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + listing.photo_filename) }}" 
+                     class="card-img-top pet-image" alt="{{ listing.pet_name }}">
+            {% else %}
+                <div class="card-img-top pet-image bg-light d-flex align-items-center justify-content-center">
+                    <i class="fas fa-paw fa-3x text-muted"></i>
+                </div>
+            {% endif %}
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">
+                    {{ listing.pet_name }}
+                    <span class="badge bg-success ms-2">Available</span>
+                </h5>
+                <p class="card-text flex-grow-1">
+                    <strong>Breed:</strong> {{ listing.breed }}<br>
+                    <strong>Age:</strong> {{ listing.age }} months<br>
+                    <strong>Gender:</strong> {{ listing.gender.title() }}<br>
+                    <strong>Size:</strong> {{ listing.size.title() }}
+                    {% if listing.adoption_fee and listing.adoption_fee > 0 %}
+                        <br><strong>Adoption Fee:</strong> ${{ listing.adoption_fee }}
+                    {% endif %}
+                </p>
+                
+                <div class="mt-auto">
+                    <!-- Characteristics badges -->
+                    <div class="mb-2">
+                        {% if listing.good_with_kids %}
+                            <span class="badge bg-info me-1">Good with Kids</span>
+                        {% endif %}
+                        {% if listing.good_with_pets %}
+                            <span class="badge bg-info me-1">Good with Pets</span>
+                        {% endif %}
+                        {% if listing.spayed_neutered %}
+                            <span class="badge bg-secondary me-1">Spayed/Neutered</span>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#adoptionModal{{ listing.id }}">
+                        <i class="fas fa-heart me-2"></i>Learn More
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Adoption Details Modal -->
+    <div class="modal fade" id="adoptionModal{{ listing.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ listing.pet_name }} - Adoption Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    {% if listing.photo_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + listing.photo_filename) }}" 
+                             class="img-fluid mb-3 rounded" alt="{{ listing.pet_name }}">
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-paw me-2"></i>Basic Information</h6>
+                            <p><strong>Breed:</strong> {{ listing.breed }}</p>
+                            <p><strong>Age:</strong> {{ listing.age }} months</p>
+                            <p><strong>Gender:</strong> {{ listing.gender.title() }}</p>
+                            <p><strong>Size:</strong> {{ listing.size.title() }}</p>
+                            {% if listing.adoption_fee and listing.adoption_fee > 0 %}
+                                <p><strong>Adoption Fee:</strong> ${{ listing.adoption_fee }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-check-circle me-2"></i>Health & Characteristics</h6>
+                            <p><strong>Vaccination Status:</strong> {{ listing.vaccination_status or 'Please ask agency' }}</p>
+                            <p><strong>Spayed/Neutered:</strong> {% if listing.spayed_neutered %}Yes{% else %}No{% endif %}</p>
+                            <p><strong>Good with Kids:</strong> {% if listing.good_with_kids %}Yes{% else %}No{% endif %}</p>
+                            <p><strong>Good with Pets:</strong> {% if listing.good_with_pets %}Yes{% else %}No{% endif %}</p>
+                        </div>
+                    </div>
+                    
+                    {% if listing.description %}
+                        <h6><i class="fas fa-info-circle me-2"></i>About {{ listing.pet_name }}</h6>
+                        <p>{{ listing.description }}</p>
+                    {% endif %}
+                    
+                    <div class="alert alert-info">
+                        <i class="fas fa-home me-2"></i>
+                        <strong>Interested in adopting?</strong> Contact the adoption agency directly for more information about {{ listing.pet_name }} and to start the adoption process.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success">
+                        <i class="fas fa-envelope me-2"></i>Contact Agency
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if listings.pages > 1 %}
+<nav aria-label="Pet listings pagination">
+    <ul class="pagination justify-content-center">
+        {% if listings.has_prev %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('browse_pets', page=listings.prev_num, breed=breed_filter, size=size_filter) }}">Previous</a>
+            </li>
+        {% endif %}
+        
+        {% for page_num in listings.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != listings.page %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('browse_pets', page=page_num, breed=breed_filter, size=size_filter) }}">{{ page_num }}</a>
+                    </li>
+                {% else %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+        
+        {% if listings.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="{{ url_for('browse_pets', page=listings.next_num, breed=breed_filter, size=size_filter) }}">Next</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-search fa-5x text-muted mb-4"></i>
+    <h4>No pets found</h4>
+    {% if breed_filter or size_filter %}
+        <p class="text-muted">Try adjusting your search filters to see more results.</p>
+        <a href="{{ url_for('browse_pets') }}" class="btn btn-primary">
+            <i class="fas fa-times me-2"></i>Clear Filters
+        </a>
+    {% else %}
+        <p class="text-muted">No pets are currently available for adoption. Check back soon!</p>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}

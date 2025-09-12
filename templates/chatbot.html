@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Pet Care Assistant - Pet Care Connect{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-robot me-2"></i>Pet Care Assistant
+                    <small class="float-end">Powered by AI</small>
+                </h4>
+            </div>
+            <div class="card-body p-0">
+                <div id="chatMessages" class="chat-container">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="message {% if message.is_bot %}bot-message{% else %}user-message{% endif %}">
+                                {% if message.is_bot %}
+                                    <i class="fas fa-robot me-2"></i>
+                                {% else %}
+                                    <i class="fas fa-user me-2"></i>
+                                {% endif %}
+                                {{ message.message }}
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="message bot-message">
+                            <i class="fas fa-robot me-2"></i>
+                            Hello! I'm your Pet Care Assistant. I can help you with questions about pet health, nutrition, behavior, training, and general care advice. What would you like to know about your pets today?
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="p-3 border-top">
+                    <form id="chatForm" class="d-flex">
+                        <input type="text" id="messageInput" class="form-control me-2" 
+                               placeholder="Ask me about pet care, nutrition, health, or behavior..." required>
+                        <button type="submit" class="btn btn-primary" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </form>
+                    <small class="text-muted mt-2 d-block">
+                        <i class="fas fa-info-circle me-1"></i>
+                        For serious health concerns, always consult with a veterinarian.
+                    </small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-heart fa-2x text-danger mb-2"></i>
+                        <h6>Health & Wellness</h6>
+                        <small class="text-muted">Ask about symptoms, preventive care, and health tips</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-utensils fa-2x text-success mb-2"></i>
+                        <h6>Nutrition & Diet</h6>
+                        <small class="text-muted">Learn about proper feeding, food choices, and dietary needs</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-graduation-cap fa-2x text-primary mb-2"></i>
+                        <h6>Training & Behavior</h6>
+                        <small class="text-muted">Get advice on training techniques and behavior issues</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chatForm');
+    const messageInput = document.getElementById('messageInput');
+    const chatMessages = document.getElementById('chatMessages');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    // Scroll to bottom of chat
+    function scrollToBottom() {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Add message to chat
+    function addMessage(message, isBot = false) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isBot ? 'bot-message' : 'user-message'}`;
+        
+        const icon = isBot ? 'fas fa-robot' : 'fas fa-user';
+        messageDiv.innerHTML = `<i class="${icon} me-2"></i>${message}`;
+        
+        chatMessages.appendChild(messageDiv);
+        scrollToBottom();
+    }
+    
+    // Show typing indicator
+    function showTyping() {
+        const typingDiv = document.createElement('div');
+        typingDiv.id = 'typing';
+        typingDiv.className = 'message bot-message';
+        typingDiv.innerHTML = '<i class="fas fa-robot me-2"></i>Typing...';
+        chatMessages.appendChild(typingDiv);
+        scrollToBottom();
+    }
+    
+    // Remove typing indicator
+    function hideTyping() {
+        const typing = document.getElementById('typing');
+        if (typing) {
+            typing.remove();
+        }
+    }
+    
+    // Handle form submission
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const message = messageInput.value.trim();
+        if (!message) return;
+        
+        // Disable input and button
+        messageInput.disabled = true;
+        sendBtn.disabled = true;
+        
+        // Add user message
+        addMessage(message, false);
+        messageInput.value = '';
+        
+        // Show typing indicator
+        showTyping();
+        
+        try {
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ message: message })
+            });
+            
+            const data = await response.json();
+            
+            // Hide typing indicator
+            hideTyping();
+            
+            if (response.ok) {
+                addMessage(data.bot_response, true);
+            } else {
+                addMessage('Sorry, I encountered an error. Please try again.', true);
+            }
+        } catch (error) {
+            hideTyping();
+            addMessage('Sorry, I could not connect to the server. Please check your connection and try again.', true);
+        }
+        
+        // Re-enable input and button
+        messageInput.disabled = false;
+        sendBtn.disabled = false;
+        messageInput.focus();
+    });
+    
+    // Initial scroll to bottom
+    scrollToBottom();
+    
+    // Focus on input
+    messageInput.focus();
+});
+</script>
+{% endblock %}
