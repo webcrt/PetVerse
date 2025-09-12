@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Applications{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-clipboard-list"></i> Adoption Applications</h3>
+        </div>
+        <div class="card-body">
+            {% if applications %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>Pet</th>
+                            <th>Applicant</th>
+                            <th>Applied On</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in applications %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if app.listing.photo_filename %}
+                                    <img src="{{ url_for('static', filename='uploads/' + app.listing.photo_filename) }}" 
+                                         class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="{{ app.listing.pet_name }}">
+                                    {% else %}
+                                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                        <i class="fas fa-paw text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ app.listing.pet_name }}</strong>
+                                        <br><small class="text-muted">{{ app.listing.breed }} • {{ app.listing.age }} months</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <strong>{{ app.applicant_name }}</strong>
+                                <br><small class="text-muted">{{ app.applicant_email }}</small>
+                                {% if app.applicant_phone %}
+                                <br><small class="text-muted">{{ app.applicant_phone }}</small>
+                                {% endif %}
+                            </td>
+                            <td>{{ app.applied_at.strftime('%B %d, %Y') }}</td>
+                            <td>
+                                {% if app.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">
+                                        <i class="fas fa-clock"></i> Pending Review
+                                    </span>
+                                {% elif app.status == 'approved' %}
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-check-circle"></i> Approved
+                                    </span>
+                                {% elif app.status == 'rejected' %}
+                                    <span class="badge bg-danger">
+                                        <i class="fas fa-times-circle"></i> Rejected
+                                    </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if app.status == 'pending' %}
+                                    <a href="{{ url_for('respond_application', app_id=app.id) }}" 
+                                       class="btn btn-sm btn-primary">
+                                        <i class="fas fa-edit"></i> Review & Respond
+                                    </a>
+                                {% else %}
+                                    <button class="btn btn-sm btn-outline-secondary" disabled>
+                                        <i class="fas fa-check"></i> Responded
+                                    </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">No Applications Yet</h4>
+                <p class="text-muted">You haven't received any adoption applications yet.</p>
+                <a href="{{ url_for('agency_dashboard') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add More Pets for Adoption
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if applications %}
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-center bg-info text-white">
+                <div class="card-body">
+                    <h3>{{ applications|selectattr('status', 'equalto', 'pending')|list|length }}</h3>
+                    <p class="mb-0">Pending Applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-success text-white">
+                <div class="card-body">
+                    <h3>{{ applications|selectattr('status', 'equalto', 'approved')|list|length }}</h3>
+                    <p class="mb-0">Approved Applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center bg-danger text-white">
+                <div class="card-body">
+                    <h3>{{ applications|selectattr('status', 'equalto', 'rejected')|list|length }}</h3>
+                    <p class="mb-0">Rejected Applications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="card mt-4 bg-light">
+        <div class="card-body">
+            <h5><i class="fas fa-lightbulb text-warning"></i> Application Review Tips</h5>
+            <div class="row">
+                <div class="col-md-6">
+                    <ul class="mb-0">
+                        <li>Review the applicant's experience with pets</li>
+                        <li>Consider their living situation and space</li>
+                        <li>Look for genuine interest and commitment</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <ul class="mb-0">
+                        <li>Check if they have appropriate arrangements</li>
+                        <li>Consider compatibility with the specific pet</li>
+                        <li>Provide helpful feedback in your response</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

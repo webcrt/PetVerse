@@ -35,10 +35,46 @@
     <div class="col-md-4">
         <div class="card dashboard-card text-center">
             <div class="card-body">
-                <i class="fas fa-chart-bar fa-3x text-info mb-3"></i>
+                <i class="fas fa-clipboard-list fa-3x text-info mb-3"></i>
+                <h5>Applications</h5>
+                <a href="{{ url_for('manage_applications') }}" class="btn btn-info">
+                    <i class="fas fa-file-alt me-2"></i>Manage Applications
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-chart-bar fa-3x text-secondary mb-3"></i>
                 <h5>View Reports</h5>
-                <a href="#" class="btn btn-info">
-                    <i class="fas fa-chart-line me-2"></i>Reports
+                <a href="#" class="btn btn-outline-secondary">
+                    <i class="fas fa-chart-line me-2"></i>Coming Soon
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                <h5>AI Pet Care</h5>
+                <a href="{{ url_for('chatbot') }}" class="btn btn-primary">
+                    <i class="fas fa-comments me-2"></i>Get AI Advice
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-envelope fa-3x text-warning mb-3"></i>
+                <h5>Email Center</h5>
+                <a href="{{ url_for('manage_applications') }}" class="btn btn-warning">
+                    <i class="fas fa-paper-plane me-2"></i>Send Notifications
                 </a>
             </div>
         </div>

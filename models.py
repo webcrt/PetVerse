@@ -93,3 +93,72 @@ class ChatMessage(db.Model):
     message = db.Column(db.Text, nullable=False)
     is_bot = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+class AdoptionApplication(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    listing_id = db.Column(db.Integer, db.ForeignKey('adoption_listing.id'), nullable=False)
+    applicant_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    applicant_name = db.Column(db.String(100), nullable=False)
+    applicant_email = db.Column(db.String(120), nullable=False)
+    applicant_phone = db.Column(db.String(20))
+    experience_with_pets = db.Column(db.Text)
+    living_situation = db.Column(db.String(100))  # apartment, house, etc.
+    have_yard = db.Column(db.Boolean, default=False)
+    other_pets = db.Column(db.Text)
+    reason_for_adoption = db.Column(db.Text)
+    status = db.Column(db.String(20), default='pending')  # pending, approved, rejected
+    application_date = db.Column(db.DateTime, default=datetime.utcnow)
+    response_date = db.Column(db.DateTime)
+    agency_notes = db.Column(db.Text)
+    
+    # Relationships
+    listing = db.relationship('AdoptionListing', backref='applications')
+    applicant = db.relationship('User', backref='adoption_applications')
+
+class Cart(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    items = db.relationship('CartItem', backref='cart', lazy=True, cascade='all, delete-orphan')
+    user = db.relationship('User', backref='cart')
+
+class CartItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cart_id = db.Column(db.Integer, db.ForeignKey('cart.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    added_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    product = db.relationship('Product', backref='cart_items')
+
+class FeedingReminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id'), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    reminder_time = db.Column(db.String(10), nullable=False)  # Format: HH:MM
+    food_type = db.Column(db.String(100))
+    amount = db.Column(db.String(50))
+    notes = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_sent = db.Column(db.DateTime)
+    
+    # Relationships
+    pet = db.relationship('Pet', backref='feeding_reminders')
+    owner = db.relationship('User', backref='feeding_reminders')
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    notification_type = db.Column(db.String(50), nullable=False)  # email, system, reminder
+    status = db.Column(db.String(20), default='sent')  # sent, delivered, failed
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    read_at = db.Column(db.DateTime)
+    
+    # Relationships
+    user = db.relationship('User', backref='notifications')

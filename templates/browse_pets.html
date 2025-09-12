@@ -139,9 +139,19 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-success">
-                        <i class="fas fa-envelope me-2"></i>Contact Agency
-                    </button>
+                    {% if session.user_type == 'pet_owner' %}
+                        {% if listing.is_available %}
+                        <a href="{{ url_for('apply_for_adoption', listing_id=listing.id) }}" class="btn btn-success">
+                            <i class="fas fa-heart me-2"></i>Apply to Adopt
+                        </a>
+                        {% else %}
+                        <span class="badge bg-secondary fs-6">Not Available</span>
+                        {% endif %}
+                    {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-success">
+                        <i class="fas fa-sign-in-alt me-2"></i>Login to Apply
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>

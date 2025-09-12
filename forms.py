@@ -76,3 +76,39 @@ class OrderForm(FlaskForm):
     customer_email = EmailField('Email', validators=[DataRequired(), Email()])
     customer_phone = StringField('Phone Number', validators=[Length(max=20)])
     customer_address = TextAreaField('Delivery Address', validators=[DataRequired()])
+
+class AdoptionApplicationForm(FlaskForm):
+    applicant_name = StringField('Your Full Name', validators=[DataRequired(), Length(min=2, max=100)])
+    applicant_email = EmailField('Email Address', validators=[DataRequired(), Email()])
+    applicant_phone = StringField('Phone Number', validators=[Length(max=20)])
+    experience_with_pets = TextAreaField('Experience with Pets', validators=[DataRequired()], 
+                                       render_kw={"placeholder": "Tell us about your experience with pets..."})
+    living_situation = SelectField('Living Situation', choices=[
+        ('apartment', 'Apartment'),
+        ('house', 'House'),
+        ('condo', 'Condo/Townhouse'),
+        ('farm', 'Farm/Rural Property')
+    ], validators=[DataRequired()])
+    have_yard = BooleanField('I have a yard or outdoor space')
+    other_pets = TextAreaField('Other Pets at Home', 
+                             render_kw={"placeholder": "Please describe any other pets you currently have..."})
+    reason_for_adoption = TextAreaField('Why do you want to adopt this pet?', validators=[DataRequired()],
+                                      render_kw={"placeholder": "Tell us why you want to give this pet a loving home..."})
+
+class FeedingReminderForm(FlaskForm):
+    reminder_time = StringField('Reminder Time (HH:MM)', validators=[DataRequired()], 
+                               render_kw={"placeholder": "e.g., 08:00"})
+    food_type = StringField('Food Type', validators=[Length(max=100)],
+                          render_kw={"placeholder": "e.g., Dry kibble, Wet food"})
+    amount = StringField('Amount', validators=[Length(max=50)],
+                        render_kw={"placeholder": "e.g., 1 cup, 2 scoops"})
+    notes = TextAreaField('Additional Notes',
+                         render_kw={"placeholder": "Any special feeding instructions..."})
+
+class ApplicationResponseForm(FlaskForm):
+    status = SelectField('Application Status', choices=[
+        ('approved', 'Approve Application'),
+        ('rejected', 'Reject Application')
+    ], validators=[DataRequired()])
+    agency_notes = TextAreaField('Notes to Applicant', 
+                                render_kw={"placeholder": "Optional message to the applicant..."})

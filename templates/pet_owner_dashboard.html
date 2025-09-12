@@ -56,6 +56,58 @@
     </div>
 </div>
 
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-shopping-cart fa-3x text-primary mb-3"></i>
+                <h5>Shop Products</h5>
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('products') }}" class="btn btn-primary">
+                        <i class="fas fa-store me-2"></i>Shop Now
+                    </a>
+                    <a href="{{ url_for('view_cart') }}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-shopping-cart me-2"></i>View Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                <h5>My Applications</h5>
+                <a href="{{ url_for('my_applications') }}" class="btn btn-danger">
+                    <i class="fas fa-file-alt me-2"></i>View Applications
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-bell fa-3x text-warning mb-3"></i>
+                <h5>Feeding Reminders</h5>
+                <a href="{{ url_for('feeding_reminders') }}" class="btn btn-warning">
+                    <i class="fas fa-clock me-2"></i>Manage Reminders
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-credit-card fa-3x text-success mb-3"></i>
+                <h5>Quick Checkout</h5>
+                <a href="{{ url_for('checkout') }}" class="btn btn-success">
+                    <i class="fas fa-shopping-bag me-2"></i>Checkout
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="row">
     <div class="col-12">
         <h3 class="mb-3">

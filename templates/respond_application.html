@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Respond to Application{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-reply"></i> Respond to Application</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            {% if application.listing.photo_filename %}
+                                <img src="{{ url_for('static', filename='uploads/' + application.listing.photo_filename) }}" 
+                                     class="img-fluid rounded shadow-sm" alt="{{ application.listing.pet_name }}">
+                            {% else %}
+                                <div class="placeholder-image bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-paw fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ application.listing.pet_name }}</h4>
+                            <p><strong>Breed:</strong> {{ application.listing.breed }}</p>
+                            <p><strong>Age:</strong> {{ application.listing.age }} months</p>
+                            <p><strong>Applied:</strong> {{ application.applied_at.strftime('%B %d, %Y') }}</p>
+                            <span class="badge bg-warning">{{ application.status|title }}</span>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            {{ form.status.label(class="form-label") }}
+                            {{ form.status(class="form-control form-control-lg") }}
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            {{ form.agency_notes.label(class="form-label") }}
+                            {{ form.agency_notes(class="form-control", rows="4") }}
+                            <small class="text-muted">This message will be sent to the applicant via email.</small>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('manage_applications') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Applications
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Send Response
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-user"></i> Applicant Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> {{ application.applicant_name }}</p>
+                    <p><strong>Email:</strong> {{ application.applicant_email }}</p>
+                    {% if application.applicant_phone %}
+                    <p><strong>Phone:</strong> {{ application.applicant_phone }}</p>
+                    {% endif %}
+                    <p><strong>Living Situation:</strong> {{ application.living_situation|title }}</p>
+                    {% if application.have_yard %}
+                    <p><i class="fas fa-check-circle text-success"></i> Has yard/outdoor space</p>
+                    {% else %}
+                    <p><i class="fas fa-times-circle text-muted"></i> No yard/outdoor space</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-heart"></i> Pet Experience</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Experience:</strong></p>
+                    <p class="text-muted">{{ application.experience_with_pets }}</p>
+                    
+                    {% if application.other_pets %}
+                    <p><strong>Other Pets:</strong></p>
+                    <p class="text-muted">{{ application.other_pets }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-question-circle"></i> Adoption Reason</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">{{ application.reason_for_adoption }}</p>
+                </div>
+            </div>
+            
+            <div class="card mt-3 bg-info text-white">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Review Guidelines</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Consider pet compatibility</li>
+                        <li>Evaluate living arrangements</li>
+                        <li>Assess commitment level</li>
+                        <li>Be constructive in feedback</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

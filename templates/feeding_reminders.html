@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Feeding Reminders{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-bell"></i> Set Feeding Reminder</h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="form-group mb-3">
+                            <label class="form-label"><i class="fas fa-paw"></i> Select Pet</label>
+                            <select name="pet_id" class="form-control" required>
+                                <option value="">Choose your pet...</option>
+                                {% for pet in pets %}
+                                <option value="{{ pet.id }}">{{ pet.name }} ({{ pet.breed }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.reminder_time.label(class="form-label") }}
+                                    {{ form.reminder_time(class="form-control") }}
+                                    <small class="text-muted">24-hour format (e.g., 08:00, 18:30)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.food_type.label(class="form-label") }}
+                                    {{ form.food_type(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.amount.label(class="form-label") }}
+                                    {{ form.amount(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-plus"></i> Add Reminder
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.notes.label(class="form-label") }}
+                            {{ form.notes(class="form-control", rows="3") }}
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4><i class="fas fa-list"></i> Your Active Reminders</h4>
+                </div>
+                <div class="card-body">
+                    {% if reminders %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pet</th>
+                                    <th>Time</th>
+                                    <th>Food Type</th>
+                                    <th>Amount</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reminder in reminders %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ reminder.pet.name }}</strong>
+                                        <br><small class="text-muted">{{ reminder.pet.breed }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ reminder.reminder_time }}</span>
+                                    </td>
+                                    <td>{{ reminder.food_type or 'Not specified' }}</td>
+                                    <td>{{ reminder.amount or 'Not specified' }}</td>
+                                    <td>
+                                        {% if reminder.notes %}
+                                        <small>{{ reminder.notes[:30] }}{% if reminder.notes|length > 30 %}...{% endif %}</small>
+                                        {% else %}
+                                        <small class="text-muted">No notes</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('delete_reminder', reminder_id=reminder.id) }}" 
+                                           class="btn btn-sm btn-outline-danger"
+                                           onclick="return confirm('Delete this feeding reminder?');">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-bell-slash fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Active Reminders</h5>
+                        <p class="text-muted">Set up feeding reminders for your pets above.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-header">
+                    <h5><i class="fas fa-lightbulb"></i> How It Works</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Choose which pet you want to set a reminder for</li>
+                        <li>Set the feeding time and food details</li>
+                        <li>We'll send you email reminders at the scheduled time</li>
+                        <li>Never miss a feeding again!</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-tips"></i> Feeding Tips</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-clock text-primary"></i> <strong>Consistency:</strong> Feed at the same times daily</li>
+                        <li><i class="fas fa-balance-scale text-warning"></i> <strong>Portions:</strong> Follow feeding guidelines on food packaging</li>
+                        <li><i class="fas fa-tint text-info"></i> <strong>Water:</strong> Always provide fresh water</li>
+                        <li><i class="fas fa-user-md text-success"></i> <strong>Health:</strong> Monitor your pet's weight and appetite</li>
+                    </ul>
+                </div>
+            </div>
+            
+            {% if pets %}
+            <div class="card mt-3 bg-light">
+                <div class="card-header">
+                    <h5><i class="fas fa-paw"></i> Your Pets</h5>
+                </div>
+                <div class="card-body">
+                    {% for pet in pets %}
+                    <div class="d-flex align-items-center mb-2">
+                        {% if pet.photo_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + pet.photo_filename) }}" 
+                             class="rounded-circle me-3" style="width: 40px; height: 40px; object-fit: cover;" alt="{{ pet.name }}">
+                        {% else %}
+                        <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                            <i class="fas fa-paw text-white"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <strong>{{ pet.name }}</strong>
+                            <br><small class="text-muted">{{ pet.breed }} • {{ pet.age }} months</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

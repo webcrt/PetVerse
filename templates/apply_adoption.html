@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for Adoption - {{ listing.pet_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-heart"></i> Apply to Adopt {{ listing.pet_name }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            {% if listing.photo_filename %}
+                                <img src="{{ url_for('static', filename='uploads/' + listing.photo_filename) }}" 
+                                     class="img-fluid rounded shadow-sm" alt="{{ listing.pet_name }}">
+                            {% else %}
+                                <div class="placeholder-image bg-light rounded d-flex align-items-center justify-content-center" style="height: 200px;">
+                                    <i class="fas fa-paw fa-3x text-muted"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <h4>{{ listing.pet_name }}</h4>
+                            <p><strong>Breed:</strong> {{ listing.breed }}</p>
+                            <p><strong>Age:</strong> {{ listing.age }} months</p>
+                            <p><strong>Size:</strong> {{ listing.size|title }}</p>
+                            <p><strong>Gender:</strong> {{ listing.gender|title }}</p>
+                            {% if listing.adoption_fee > 0 %}
+                            <p><strong>Adoption Fee:</strong> ${{ "%.2f"|format(listing.adoption_fee) }}</p>
+                            {% endif %}
+                            <p class="text-muted">{{ listing.description }}</p>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.applicant_name.label(class="form-label") }}
+                                    {{ form.applicant_name(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.applicant_email.label(class="form-label") }}
+                                    {{ form.applicant_email(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.applicant_phone.label(class="form-label") }}
+                                    {{ form.applicant_phone(class="form-control") }}
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    {{ form.living_situation.label(class="form-label") }}
+                                    {{ form.living_situation(class="form-control") }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.experience_with_pets.label(class="form-label") }}
+                            {{ form.experience_with_pets(class="form-control", rows="3") }}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.other_pets.label(class="form-label") }}
+                            {{ form.other_pets(class="form-control", rows="3") }}
+                        </div>
+                        
+                        <div class="form-group mb-3">
+                            {{ form.reason_for_adoption.label(class="form-label") }}
+                            {{ form.reason_for_adoption(class="form-control", rows="4") }}
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            {{ form.have_yard(class="form-check-input") }}
+                            {{ form.have_yard.label(class="form-check-label") }}
+                        </div>
+                        
+                        <div class="d-flex justify-content-between">
+                            <a href="{{ url_for('adoption_listings') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Listings
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane"></i> Submit Application
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card bg-info text-white">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Application Process</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Complete this application form</li>
+                        <li>The agency will review your application</li>
+                        <li>You'll receive an email notification</li>
+                        <li>If approved, the agency will contact you</li>
+                        <li>Schedule a meet & greet with {{ listing.pet_name }}!</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5><i class="fas fa-check-circle"></i> Pet Details</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        {% if listing.vaccination_status %}
+                        <li><i class="fas fa-syringe text-success"></i> {{ listing.vaccination_status }}</li>
+                        {% endif %}
+                        
+                        {% if listing.spayed_neutered %}
+                        <li><i class="fas fa-cut text-success"></i> Spayed/Neutered</li>
+                        {% endif %}
+                        
+                        {% if listing.good_with_kids %}
+                        <li><i class="fas fa-child text-success"></i> Good with Kids</li>
+                        {% endif %}
+                        
+                        {% if listing.good_with_pets %}
+                        <li><i class="fas fa-paw text-success"></i> Good with Other Pets</li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h3><i class="fas fa-shopping-cart"></i> Shopping Cart</h3>
+        </div>
+        <div class="card-body">
+            {% if cart_items %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Price</th>
+                            <th>Quantity</th>
+                            <th>Total</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if item.product.photo_filename %}
+                                    <img src="{{ url_for('static', filename='uploads/' + item.product.photo_filename) }}" 
+                                         class="rounded me-3" style="width: 60px; height: 60px; object-fit: cover;" alt="{{ item.product.name }}">
+                                    {% else %}
+                                    <div class="bg-light rounded me-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                        <i class="fas fa-box text-muted"></i>
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <strong>{{ item.product.name }}</strong>
+                                        <br><small class="text-muted">{{ item.product.brand or 'Generic' }} • {{ item.product.category|title }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${{ "%.2f"|format(item.product.price) }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ item.quantity }}</span>
+                            </td>
+                            <td><strong>${{ "%.2f"|format(item.quantity * item.product.price) }}</strong></td>
+                            <td>
+                                <a href="{{ url_for('remove_from_cart', item_id=item.id) }}" 
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Remove this item from cart?');">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <a href="{{ url_for('products') }}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Continue Shopping
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h4>Total: ${{ "%.2f"|format(total) }}</h4>
+                            {% if total > 0 %}
+                            <a href="{{ url_for('checkout') }}" class="btn btn-success btn-lg w-100 mt-2">
+                                <i class="fas fa-credit-card"></i> Checkout
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-4x text-muted mb-3"></i>
+                <h4 class="text-muted">Your Cart is Empty</h4>
+                <p class="text-muted">Add some products to your cart to get started!</p>
+                <a href="{{ url_for('products') }}" class="btn btn-primary">
+                    <i class="fas fa-store"></i> Shop Products
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if cart_items %}
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-shield-alt"></i> Secure Checkout</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li><i class="fas fa-lock text-success"></i> SSL encrypted payment processing</li>
+                        <li><i class="fas fa-credit-card text-success"></i> Secure payment via Stripe</li>
+                        <li><i class="fas fa-envelope text-success"></i> Email order confirmation</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <h5><i class="fas fa-shipping-fast"></i> Order Information</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="mb-0">
+                        <li>Free shipping on orders over $50</li>
+                        <li>2-3 business day processing time</li>
+                        <li>Email updates on your order status</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

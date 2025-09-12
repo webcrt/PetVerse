@@ -1,7 +1,7 @@
 modules = ["python-3.11"]
 [agent]
 expertMode = true
-integrations = ["python_gemini:1.0.0"]
+integrations = ["python_gemini:1.0.0", "replitmail:1.0.0", "flask_stripe:1.0.0"]
 
 [nix]
 channel = "stable-25_05"
@@ -36,5 +36,5 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 43721
+localPort = 42615
 externalPort = 3000

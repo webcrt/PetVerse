@@ -5,10 +5,15 @@ from flask_wtf import FlaskForm
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from datetime import datetime
-from models import db, User, Pet, AdoptionListing, Product, Order, ChatMessage
-from forms import LoginForm, RegisterForm, PetForm, AdoptionListingForm, ProductForm, OrderForm
+from models import db, User, Pet, AdoptionListing, Product, Order, ChatMessage, AdoptionApplication, Cart, CartItem, FeedingReminder, Notification
+from forms import LoginForm, RegisterForm, PetForm, AdoptionListingForm, ProductForm, OrderForm, AdoptionApplicationForm, FeedingReminderForm, ApplicationResponseForm
 from gemini import get_pet_advice
+from email_utils import send_adoption_application_notification, send_application_response_notification, send_feeding_reminder, send_order_confirmation
+import stripe
 import uuid
+
+# Configure Stripe
+stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SESSION_SECRET', 'dev-secret-key')
@@ -289,7 +294,6 @@ def edit_pet(pet_id):
     
     if form.validate_on_submit():
         pet.name = form.name.data
-        pet.species = form.species.data
         pet.breed = form.breed.data
         pet.age = form.age.data
         pet.weight = form.weight.data
@@ -319,7 +323,6 @@ def edit_listing(listing_id):
     
     if form.validate_on_submit():
         listing.pet_name = form.pet_name.data
-        listing.species = form.species.data
         listing.breed = form.breed.data
         listing.age = form.age.data
         listing.gender = form.gender.data
@@ -371,6 +374,363 @@ def edit_product(product_id):
         return redirect(url_for('supplier_dashboard'))
     
     return render_template('add_product.html', form=form, edit_mode=True)
+
+# ==================== ADOPTION APPLICATION ROUTES ====================
+
+@app.route('/apply/<int:listing_id>', methods=['GET', 'POST'])
+def apply_for_adoption(listing_id):
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Please log in as a pet owner to apply for adoption.', 'error')
+        return redirect(url_for('login'))
+    
+    listing = AdoptionListing.query.get_or_404(listing_id)
+    if not listing.is_available:
+        flash('This pet is no longer available for adoption.', 'error')
+        return redirect(url_for('adoption_listings'))
+    
+    form = AdoptionApplicationForm()
+    
+    if form.validate_on_submit():
+        # Check if user already applied for this pet
+        existing_app = AdoptionApplication.query.filter_by(
+            listing_id=listing_id,
+            applicant_user_id=session['user_id']
+        ).first()
+        
+        if existing_app:
+            flash('You have already applied for this pet!', 'error')
+            return redirect(url_for('adoption_listings'))
+        
+        application = AdoptionApplication(
+            listing_id=listing_id,
+            applicant_user_id=session['user_id'],
+            applicant_name=form.applicant_name.data,
+            applicant_email=form.applicant_email.data,
+            applicant_phone=form.applicant_phone.data,
+            experience_with_pets=form.experience_with_pets.data,
+            living_situation=form.living_situation.data,
+            have_yard=form.have_yard.data,
+            other_pets=form.other_pets.data,
+            reason_for_adoption=form.reason_for_adoption.data
+        )
+        
+        db.session.add(application)
+        db.session.commit()
+        
+        # Send email notification to agency
+        agency = User.query.get(listing.agency_id)
+        send_adoption_application_notification(
+            agency.email, 
+            form.applicant_name.data, 
+            listing.pet_name, 
+            application.id
+        )
+        
+        flash('Your adoption application has been submitted successfully! The agency will contact you soon.', 'success')
+        return redirect(url_for('my_applications'))
+    
+    return render_template('apply_adoption.html', form=form, listing=listing)
+
+@app.route('/my_applications')
+def my_applications():
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Please log in as a pet owner to view applications.', 'error')
+        return redirect(url_for('login'))
+    
+    applications = AdoptionApplication.query.filter_by(applicant_user_id=session['user_id']).all()
+    return render_template('my_applications.html', applications=applications)
+
+@app.route('/manage_applications')
+def manage_applications():
+    if 'user_id' not in session or session.get('user_type') != 'adoption_agency':
+        flash('Please log in as an adoption agency to manage applications.', 'error')
+        return redirect(url_for('login'))
+    
+    # Get all applications for this agency's listings
+    applications = AdoptionApplication.query.join(AdoptionListing).filter(
+        AdoptionListing.agency_id == session['user_id']
+    ).all()
+    
+    return render_template('manage_applications.html', applications=applications)
+
+@app.route('/respond_application/<int:app_id>', methods=['GET', 'POST'])
+def respond_application(app_id):
+    if 'user_id' not in session or session.get('user_type') != 'adoption_agency':
+        flash('Access denied.', 'error')
+        return redirect(url_for('login'))
+    
+    application = AdoptionApplication.query.get_or_404(app_id)
+    
+    # Verify this application belongs to agency's listing
+    if application.listing.agency_id != session['user_id']:
+        flash('Access denied.', 'error')
+        return redirect(url_for('agency_dashboard'))
+    
+    form = ApplicationResponseForm()
+    
+    if form.validate_on_submit():
+        application.status = form.status.data
+        application.agency_notes = form.agency_notes.data
+        application.responded_at = datetime.utcnow()
+        
+        # If approved, mark pet as unavailable
+        if form.status.data == 'approved':
+            application.listing.is_available = False
+        
+        db.session.commit()
+        
+        # Send email notification to applicant
+        send_application_response_notification(
+            application.applicant_email,
+            application.listing.pet_name,
+            form.status.data,
+            form.agency_notes.data
+        )
+        
+        flash(f'Application has been {form.status.data}!', 'success')
+        return redirect(url_for('manage_applications'))
+    
+    return render_template('respond_application.html', form=form, application=application)
+
+# ==================== SHOPPING CART & PAYMENT ROUTES ====================
+
+@app.route('/cart')
+def view_cart():
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Please log in as a pet owner to view cart.', 'error')
+        return redirect(url_for('login'))
+    
+    cart = Cart.query.filter_by(user_id=session['user_id']).first()
+    if not cart:
+        cart = Cart(user_id=session['user_id'])
+        db.session.add(cart)
+        db.session.commit()
+    
+    cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
+    total = sum(item.quantity * item.product.price for item in cart_items)
+    
+    return render_template('cart.html', cart_items=cart_items, total=total)
+
+@app.route('/add_to_cart/<int:product_id>')
+def add_to_cart(product_id):
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Please log in as a pet owner to add items to cart.', 'error')
+        return redirect(url_for('login'))
+    
+    product = Product.query.get_or_404(product_id)
+    
+    if product.stock_quantity <= 0:
+        flash('Sorry, this product is out of stock.', 'error')
+        return redirect(url_for('products'))
+    
+    # Get or create cart
+    cart = Cart.query.filter_by(user_id=session['user_id']).first()
+    if not cart:
+        cart = Cart(user_id=session['user_id'])
+        db.session.add(cart)
+        db.session.commit()
+    
+    # Check if item already in cart
+    cart_item = CartItem.query.filter_by(cart_id=cart.id, product_id=product_id).first()
+    
+    if cart_item:
+        if cart_item.quantity < product.stock_quantity:
+            cart_item.quantity += 1
+            flash(f'Updated {product.name} quantity in cart!', 'success')
+        else:
+            flash('Cannot add more - not enough stock available.', 'error')
+    else:
+        cart_item = CartItem(cart_id=cart.id, product_id=product_id, quantity=1)
+        db.session.add(cart_item)
+        flash(f'Added {product.name} to cart!', 'success')
+    
+    db.session.commit()
+    return redirect(url_for('products'))
+
+@app.route('/remove_from_cart/<int:item_id>')
+def remove_from_cart(item_id):
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Access denied.', 'error')
+        return redirect(url_for('login'))
+    
+    cart_item = CartItem.query.get_or_404(item_id)
+    
+    # Verify this item belongs to user's cart
+    if cart_item.cart.user_id != session['user_id']:
+        flash('Access denied.', 'error')
+        return redirect(url_for('view_cart'))
+    
+    db.session.delete(cart_item)
+    db.session.commit()
+    flash('Item removed from cart!', 'success')
+    
+    return redirect(url_for('view_cart'))
+
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Please log in as a pet owner to checkout.', 'error')
+        return redirect(url_for('login'))
+    
+    cart = Cart.query.filter_by(user_id=session['user_id']).first()
+    if not cart or not cart.items:
+        flash('Your cart is empty!', 'error')
+        return redirect(url_for('products'))
+    
+    cart_items = cart.items
+    total = sum(item.quantity * item.product.price for item in cart_items)
+    
+    if request.method == 'POST':
+        try:
+            # Create Stripe payment intent
+            intent = stripe.PaymentIntent.create(
+                amount=int(total * 100),  # Stripe amount in cents
+                currency='usd',
+                metadata={
+                    'user_id': session['user_id'],
+                    'cart_id': cart.id
+                }
+            )
+            
+            # Generate order number
+            order_number = f"PCC-{uuid.uuid4().hex[:8].upper()}"
+            
+            # Create order record
+            user = User.query.get(session['user_id'])
+            order = Order(
+                order_number=order_number,
+                customer_name=user.name,
+                customer_email=user.email,
+                customer_phone=user.phone or '',
+                customer_address=user.address or '',
+                total_amount=total,
+                payment_status='completed',
+                stripe_payment_intent_id=intent.id
+            )
+            
+            db.session.add(order)
+            db.session.flush()  # Get order.id
+            
+            # Create order items and update stock
+            order_items_data = []
+            for cart_item in cart_items:
+                # Check stock availability
+                if cart_item.product.stock_quantity < cart_item.quantity:
+                    flash(f'Sorry, only {cart_item.product.stock_quantity} {cart_item.product.name} available.', 'error')
+                    return redirect(url_for('view_cart'))
+                
+                # Update stock
+                cart_item.product.stock_quantity -= cart_item.quantity
+                
+                # Create order item
+                order_item = OrderItem(
+                    order_id=order.id,
+                    product_id=cart_item.product_id,
+                    quantity=cart_item.quantity,
+                    price=cart_item.product.price
+                )
+                db.session.add(order_item)
+                
+                order_items_data.append({
+                    'name': cart_item.product.name,
+                    'quantity': cart_item.quantity,
+                    'price': cart_item.product.price
+                })
+            
+            # Clear cart
+            for cart_item in cart_items:
+                db.session.delete(cart_item)
+            
+            db.session.commit()
+            
+            # Send order confirmation email
+            send_order_confirmation(
+                user.email,
+                order_number,
+                total,
+                order_items_data
+            )
+            
+            flash('Order placed successfully! Check your email for confirmation.', 'success')
+            return redirect(url_for('pet_owner_dashboard'))
+            
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Payment failed: {str(e)}', 'error')
+            return redirect(url_for('view_cart'))
+    
+    return render_template('checkout.html', cart_items=cart_items, total=total)
+
+# ==================== FEEDING REMINDER ROUTES ====================
+
+@app.route('/feeding_reminders', methods=['GET', 'POST'])
+def feeding_reminders():
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Please log in as a pet owner to manage feeding reminders.', 'error')
+        return redirect(url_for('login'))
+    
+    pets = Pet.query.filter_by(owner_id=session['user_id']).all()
+    
+    if not pets:
+        flash('Please add a pet first before setting feeding reminders.', 'info')
+        return redirect(url_for('add_pet'))
+    
+    form = FeedingReminderForm()
+    
+    if form.validate_on_submit() and request.form.get('pet_id'):
+        pet_id = int(request.form.get('pet_id'))
+        pet = Pet.query.filter_by(id=pet_id, owner_id=session['user_id']).first()
+        
+        if not pet:
+            flash('Invalid pet selected.', 'error')
+            return redirect(url_for('feeding_reminders'))
+        
+        reminder = FeedingReminder(
+            pet_id=pet_id,
+            user_id=session['user_id'],
+            reminder_time=form.reminder_time.data,
+            food_type=form.food_type.data,
+            amount=form.amount.data,
+            notes=form.notes.data
+        )
+        
+        db.session.add(reminder)
+        db.session.commit()
+        
+        # Send test reminder email
+        user = User.query.get(session['user_id'])
+        send_feeding_reminder(
+            user.email,
+            pet.name,
+            form.food_type.data,
+            form.amount.data,
+            form.reminder_time.data
+        )
+        
+        flash('Feeding reminder set successfully! You\'ll receive email notifications.', 'success')
+        return redirect(url_for('feeding_reminders'))
+    
+    user_reminders = FeedingReminder.query.filter_by(user_id=session['user_id']).all()
+    
+    return render_template('feeding_reminders.html', form=form, pets=pets, reminders=user_reminders)
+
+@app.route('/delete_reminder/<int:reminder_id>')
+def delete_reminder(reminder_id):
+    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
+        flash('Access denied.', 'error')
+        return redirect(url_for('login'))
+    
+    reminder = FeedingReminder.query.get_or_404(reminder_id)
+    
+    if reminder.user_id != session['user_id']:
+        flash('Access denied.', 'error')
+        return redirect(url_for('feeding_reminders'))
+    
+    db.session.delete(reminder)
+    db.session.commit()
+    flash('Feeding reminder deleted!', 'success')
+    
+    return redirect(url_for('feeding_reminders'))
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

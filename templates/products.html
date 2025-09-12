@@ -1,0 +1,209 @@
+{% extends "base.html" %}
+
+{% block title %}Pet Products{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="fas fa-store"></i> Pet Products</h2>
+        {% if session.user_type == 'pet_owner' %}
+        <a href="{{ url_for('view_cart') }}" class="btn btn-outline-primary">
+            <i class="fas fa-shopping-cart"></i> View Cart
+        </a>
+        {% endif %}
+    </div>
+    
+    <!-- Filter Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-control" id="categoryFilter">
+                        <option value="">All Categories</option>
+                        <option value="food">Food</option>
+                        <option value="treats">Treats</option>
+                        <option value="toys">Toys</option>
+                        <option value="accessories">Accessories</option>
+                        <option value="health">Health & Care</option>
+                        <option value="training">Training Supplies</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control" id="petTypeFilter">
+                        <option value="">All Pet Types</option>
+                        <option value="dog">Dog</option>
+                        <option value="cat">Cat</option>
+                        <option value="bird">Bird</option>
+                        <option value="fish">Fish</option>
+                        <option value="small_animal">Small Animal</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="searchFilter" placeholder="Search products...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-control" id="sortFilter">
+                        <option value="name">Sort by Name</option>
+                        <option value="price_low">Price: Low to High</option>
+                        <option value="price_high">Price: High to Low</option>
+                        <option value="newest">Newest First</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    {% if products %}
+    <div class="row" id="productsContainer">
+        {% for product in products %}
+        <div class="col-md-4 mb-4 product-card" 
+             data-category="{{ product.category }}" 
+             data-pet-type="{{ product.pet_type }}"
+             data-name="{{ product.name.lower() }}"
+             data-price="{{ product.price }}">
+            <div class="card h-100">
+                {% if product.photo_filename %}
+                <img src="{{ url_for('static', filename='uploads/' + product.photo_filename) }}" 
+                     class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ product.name }}">
+                {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+                    <i class="fas fa-box fa-3x text-muted"></i>
+                </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-auto">
+                        <h5 class="card-title">{{ product.name }}</h5>
+                        {% if product.brand %}
+                        <p class="text-muted small">{{ product.brand }}</p>
+                        {% endif %}
+                        <p class="card-text">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                        
+                        <div class="row mb-2">
+                            <div class="col">
+                                <span class="badge bg-secondary">{{ product.category|title }}</span>
+                                <span class="badge bg-info">{{ product.pet_type|title }}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-2">
+                            <div class="col">
+                                <h4 class="text-success">${{ "%.2f"|format(product.price) }}</h4>
+                            </div>
+                            <div class="col text-end">
+                                {% if product.stock_quantity > 0 %}
+                                <small class="text-success">{{ product.stock_quantity }} in stock</small>
+                                {% else %}
+                                <small class="text-danger">Out of stock</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-auto">
+                        {% if session.user_type == 'pet_owner' %}
+                            {% if product.stock_quantity > 0 %}
+                            <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-primary w-100">
+                                <i class="fas fa-cart-plus"></i> Add to Cart
+                            </a>
+                            {% else %}
+                            <button class="btn btn-secondary w-100" disabled>
+                                <i class="fas fa-exclamation-triangle"></i> Out of Stock
+                            </button>
+                            {% endif %}
+                        {% elif session.user_type == 'supplier' %}
+                            {% if product.supplier_id == session.user_id %}
+                            <a href="{{ url_for('edit_product', product_id=product.id) }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-edit"></i> Edit Product
+                            </a>
+                            {% else %}
+                            <small class="text-muted">Sold by another supplier</small>
+                            {% endif %}
+                        {% else %}
+                            <a href="{{ url_for('login') }}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-sign-in-alt"></i> Login to Purchase
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-box-open fa-4x text-muted mb-3"></i>
+        <h4 class="text-muted">No Products Available</h4>
+        <p class="text-muted">Check back later for new products!</p>
+        {% if session.user_type == 'supplier' %}
+        <a href="{{ url_for('add_product') }}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add Your First Product
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+// Simple filtering functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    const petTypeFilter = document.getElementById('petTypeFilter');
+    const searchFilter = document.getElementById('searchFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    const productsContainer = document.getElementById('productsContainer');
+    
+    function filterProducts() {
+        const products = Array.from(document.querySelectorAll('.product-card'));
+        const category = categoryFilter.value.toLowerCase();
+        const petType = petTypeFilter.value.toLowerCase();
+        const search = searchFilter.value.toLowerCase();
+        
+        products.forEach(product => {
+            const productCategory = product.dataset.category.toLowerCase();
+            const productPetType = product.dataset.petType.toLowerCase();
+            const productName = product.dataset.name.toLowerCase();
+            
+            const matchesCategory = !category || productCategory === category;
+            const matchesPetType = !petType || productPetType === petType;
+            const matchesSearch = !search || productName.includes(search);
+            
+            if (matchesCategory && matchesPetType && matchesSearch) {
+                product.style.display = 'block';
+            } else {
+                product.style.display = 'none';
+            }
+        });
+    }
+    
+    function sortProducts() {
+        const products = Array.from(document.querySelectorAll('.product-card'));
+        const sortBy = sortFilter.value;
+        
+        products.sort((a, b) => {
+            switch(sortBy) {
+                case 'price_low':
+                    return parseFloat(a.dataset.price) - parseFloat(b.dataset.price);
+                case 'price_high':
+                    return parseFloat(b.dataset.price) - parseFloat(a.dataset.price);
+                case 'name':
+                default:
+                    return a.dataset.name.localeCompare(b.dataset.name);
+            }
+        });
+        
+        products.forEach(product => {
+            productsContainer.appendChild(product);
+        });
+    }
+    
+    categoryFilter.addEventListener('change', filterProducts);
+    petTypeFilter.addEventListener('change', filterProducts);
+    searchFilter.addEventListener('input', filterProducts);
+    sortFilter.addEventListener('change', () => {
+        filterProducts();
+        sortProducts();
+    });
+});
+</script>
+{% endblock %}
