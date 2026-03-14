@@ -160,10 +160,19 @@
 
                     {% if session.user_type == 'pet_owner' %}
                         {% if slot.status == "Available" %}
-                            <a href="{{ url_for('apply_for_vet_service', slot_id=slot.id) }}"
-                               class="btn btn-success">
-                                <i class="fas fa-calendar-check me-2"></i>Book Appointment
-                            </a>
+                            <form action="{{ url_for('apply_for_vet_service', slot_id=slot.id) }}" method="POST">
+    
+                        <select name="pet_id" class="form-control mb-2" required>
+                        {% for pet in pets %}
+                        <option value="{{ pet.id }}">{{ pet.name }}</option>
+                        {% endfor %}
+                        </select>
+
+                         <button type="submit" class="btn btn-success">
+                        Book Appointment
+                        </button>
+
+                         </form>
                         {% else %}
                             <span class="badge bg-secondary fs-6">
                                 Fully Booked

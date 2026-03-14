@@ -205,6 +205,8 @@ class VetAppointmentSlot(db.Model):
     image = db.Column(db.String(200))   # 👈 ADD THIS
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    vet = db.relationship('User', backref='vet_slots')
+
 
 class VetAppointment(db.Model):
     __tablename__ = 'vet_appointment'
@@ -222,3 +224,4 @@ class VetAppointment(db.Model):
     slot = db.relationship('VetAppointmentSlot', backref='appointments')
     owner = db.relationship('User', backref='vet_appointments')
     pet = db.relationship('Pet', backref='vet_appointments')  # ADD THIS
+    

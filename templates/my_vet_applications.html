@@ -4,142 +4,231 @@
 
 {% block content %}
 <div class="container mt-4">
-    <div class="card">
-        <div class="card-header">
-            <h3><i class="fas fa-notes-medical"></i> My Veterinary Applications</h3>
-        </div>
-        <div class="card-body">
-            {% if applications %}
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead class="table-success">
-                        <tr>
-                            <th>Service</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Notes</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for app in applications %}
-                        <tr>
-                            <td>
-                                <strong>{{ app.slot.service_name }}</strong>
-                                <br>
-                                <small class="text-muted">
-                                    {{ app.slot.description or "Veterinary Service" }}
-                                </small>
-                            </td>
 
-                            <td>
-                                {{ app.slot.date.strftime('%B %d, %Y') if app.slot.date else 'N/A' }}
-                            </td>
+<div class="card shadow-sm">
+<div class="card-header bg-white">
+<h3 class="mb-0">
+<i class="fas fa-notes-medical text-success"></i>
+My Veterinary Applications
+</h3>
+</div>
 
-                            <td>
-                                {{ app.slot.time }}
-                            </td>
+<div class="card-body">
 
-                            <td>
-                                {{ app.slot.location }}
-                            </td>
+{% if applications %}
 
-                            <td>
-                                {% if app.status == 'Pending' %}
-                                    <span class="badge bg-warning text-dark">
-                                        <i class="fas fa-clock"></i> Pending
-                                    </span>
-                                {% elif app.status == 'Approved' %}
-                                    <span class="badge bg-success">
-                                        <i class="fas fa-check-circle"></i> Approved
-                                    </span>
-                                {% elif app.status == 'Rejected' %}
-                                    <span class="badge bg-danger">
-                                        <i class="fas fa-times-circle"></i> Rejected
-                                    </span>
-                                {% endif %}
-                            </td>
+<div class="table-responsive">
 
-                            <td>
-                                {% if app.notes %}
-                                    <small>{{ app.notes }}</small>
-                                {% else %}
-                                    <small class="text-muted">No notes</small>
-                                {% endif %}
-                            </td>
+<table class="table table-hover align-middle">
 
-                            <td>
-                                {% if app.status == 'Approved' %}
-                                    <span class="badge bg-info">
-                                        <i class="fas fa-phone"></i> Clinic will contact you
-                                    </span>
-                                {% elif app.status == 'Pending' %}
-                                    <span class="badge bg-secondary">
-                                        Awaiting confirmation
-                                    </span>
-                                {% else %}
-                                    <a href="{{ url_for('browse_vet_slots') }}" 
-                                       class="btn btn-sm btn-outline-success">
-                                        Book Another Slot
-                                    </a>
-                                {% endif %}
-                            </td>
+<thead class="table-success">
+<tr>
+<th>Service</th>
+<th>Date</th>
+<th>Time</th>
+<th>Location</th>
+<th>Status</th>
+<th>Notes</th>
+<th>Actions</th>
+</tr>
+</thead>
 
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+<tbody>
 
-            {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-notes-medical fa-4x text-muted mb-3"></i>
-                <h4 class="text-muted">No Veterinary Applications Yet</h4>
-                <p class="text-muted">
-                    You haven't booked any veterinary services yet.
-                </p>
-                <a href="{{ url_for('browse_vet_slots') }}" class="btn btn-success">
-                    <i class="fas fa-stethoscope"></i> Browse Veterinary Services
-                </a>
-            </div>
-            {% endif %}
-        </div>
-    </div>
+{% for app in applications %}
 
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="card bg-light">
-                <div class="card-body">
-                    <h5>
-                        <i class="fas fa-info-circle text-info"></i> What Happens Next?
-                    </h5>
-                    <ul class="mb-0">
-                        <li>Clinic reviews your booking request</li>
-                        <li>You’ll receive confirmation if approved</li>
-                        <li>The clinic may contact you before the appointment</li>
-                        <li>Please arrive 10 minutes early on appointment day</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+<tr {% if app.slot.date == current_date %}class="table-info"{% endif %}>
 
-        <div class="col-md-6">
-            <div class="card bg-light">
-                <div class="card-body">
-                    <h5>
-                        <i class="fas fa-heartbeat text-danger"></i> Appointment Tips
-                    </h5>
-                    <ul class="mb-0">
-                        <li>Bring vaccination records if available</li>
-                        <li>Carry previous prescriptions</li>
-                        <li>Ensure your pet is safely restrained</li>
-                        <li>List any symptoms beforehand</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
+<td>
+<strong>{{ app.slot.service_type }}</strong>
+<br>
+<small class="text-muted">Veterinary Service</small>
+</td>
+
+
+<td>
+{% if app.slot.date %}
+{{ app.slot.date.strftime('%B %d, %Y') }}
+{% else %}
+<span class="text-muted">N/A</span>
+{% endif %}
+</td>
+
+
+<td>
+{{ app.slot.time or "N/A" }}
+</td>
+
+
+<td>
+<strong>{{ app.slot.vet.name }}</strong><br>
+<small class="text-muted">{{ app.slot.vet.address }}</small>
+</td>
+
+<td>
+
+{% if app.status == "pending" %}
+
+<span class="badge bg-warning text-dark">
+<i class="fas fa-clock"></i> Pending
+</span>
+
+{% elif app.status == "approved" %}
+
+<span class="badge bg-success">
+<i class="fas fa-check-circle"></i> Approved
+</span>
+
+{% elif app.status == "completed" %}
+
+<span class="badge bg-primary">
+<i class="fas fa-check-double"></i> Completed
+</span>
+
+{% elif app.status == "cancelled" %}
+
+<span class="badge bg-danger">
+<i class="fas fa-times-circle"></i> Cancelled
+</span>
+
+{% else %}
+
+<span class="badge bg-secondary">
+{{ app.status }}
+</span>
+
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if app.notes %}
+<small>{{ app.notes }}</small>
+{% else %}
+<small class="text-muted">No notes</small>
+{% endif %}
+
+</td>
+
+
+<td>
+
+{% if app.status == "approved" %}
+
+<span class="badge bg-info">
+<i class="fas fa-phone"></i>
+Clinic will contact you
+</span>
+
+{% elif app.status == "pending" %}
+
+<span class="badge bg-secondary">
+Awaiting confirmation
+</span>
+
+{% else %}
+
+<a href="{{ url_for('browse_vet_slots') }}"
+class="btn btn-sm btn-outline-success">
+Book Another Slot
+</a>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+{% else %}
+
+<div class="text-center py-5">
+
+<i class="fas fa-notes-medical fa-4x text-muted mb-3"></i>
+
+<h4 class="text-muted">
+No Veterinary Applications Yet
+</h4>
+
+<p class="text-muted">
+You haven't booked any veterinary services yet.
+</p>
+
+<a href="{{ url_for('browse_vet_slots') }}"
+class="btn btn-success">
+
+<i class="fas fa-stethoscope"></i>
+Browse Veterinary Services
+
+</a>
+
+</div>
+
+{% endif %}
+
+</div>
+</div>
+
+
+<div class="row mt-4">
+
+<div class="col-md-6">
+
+<div class="card bg-light shadow-sm">
+
+<div class="card-body">
+
+<h5>
+<i class="fas fa-info-circle text-info"></i>
+What Happens Next?
+</h5>
+
+<ul class="mb-0">
+<li>Clinic reviews your booking request</li>
+<li>You’ll receive confirmation if approved</li>
+<li>The clinic may contact you before the appointment</li>
+<li>Please arrive 10 minutes early on appointment day</li>
+</ul>
+
+</div>
+</div>
+
+</div>
+
+
+<div class="col-md-6">
+
+<div class="card bg-light shadow-sm">
+
+<div class="card-body">
+
+<h5>
+<i class="fas fa-heartbeat text-danger"></i>
+Appointment Tips
+</h5>
+
+<ul class="mb-0">
+<li>Bring vaccination records if available</li>
+<li>Carry previous prescriptions</li>
+<li>Ensure your pet is safely restrained</li>
+<li>List any symptoms beforehand</li>
+</ul>
+
+</div>
+</div>
+
+</div>
+
+</div>
+
 </div>
 {% endblock %}

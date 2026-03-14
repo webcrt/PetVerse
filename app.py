@@ -243,12 +243,16 @@ def veterinary_dashboard():
 
     # Get appointments booked for this vet
     appointments = (
-        VetAppointment.query
-        .join(VetAppointmentSlot)
-        .filter(VetAppointmentSlot.vet_id == user.id)
-        .options(joinedload(VetAppointment.slot))
-        .all()
+    VetAppointment.query
+    .join(VetAppointmentSlot)
+    .filter(VetAppointmentSlot.vet_id == user.id)
+    .options(
+        joinedload(VetAppointment.slot),
+        joinedload(VetAppointment.pet),
+        joinedload(VetAppointment.owner)
     )
+    .all()
+)
 
     return render_template(
         'veterinary_dashboard.html',
@@ -340,6 +344,7 @@ def edit_slot(slot_id):
 
 @app.route('/browse-veterinary')
 def browse_vet_slots():
+
     page = request.args.get('page', 1, type=int)
     service_filter = request.args.get('service', '')
     location_filter = request.args.get('location', '')
@@ -347,39 +352,39 @@ def browse_vet_slots():
     query = VetAppointmentSlot.query.filter_by(status="Available")
 
     if service_filter:
-        query = query.filter(VetAppointmentSlot.service_name.ilike(f"%{service_filter}%"))
+        query = query.filter(VetAppointmentSlot.service_type.ilike(f"%{service_filter}%"))
 
     if location_filter:
         query = query.filter(VetAppointmentSlot.location.ilike(f"%{location_filter}%"))
 
     slots = query.paginate(page=page, per_page=6)
 
+    # ✅ Get pets of logged-in owner
+    pets = []
+    if 'user_id' in session:
+        pets = Pet.query.filter_by(owner_id=session['user_id']).all()
+
     return render_template(
         'browse_vet_slots.html',
         slots=slots,
+        pets=pets,   # ✅ PASS PETS TO TEMPLATE
         service_filter=service_filter,
         location_filter=location_filter
     )
 
-@app.route('/my-vet-applications')
+from datetime import date
+
+@app.route("/my-vet-applications")
 def my_vet_applications():
 
-    # Access Control
-    if 'user_id' not in session or session.get('user_type') != 'pet_owner':
-        flash("Access Denied!", "danger")
-        return redirect(url_for('login'))
-
-    # Get all applications of logged-in pet owner
-    applications = (
-        VetAppointment.query
-        .filter_by(pet_owner_id=session['user_id'])
-        .order_by(VetAppointment.created_at.desc())
-        .all()
-    )
+    applications = VetAppointment.query.filter_by(
+        pet_owner_id=session['user_id']
+    ).all()
 
     return render_template(
         "my_vet_applications.html",
-        applications=applications
+        applications=applications,
+        current_date=date.today()
     )
 
 @app.route('/apply-vet-service/<int:slot_id>', methods=['POST'])
@@ -397,9 +402,10 @@ def apply_for_vet_service(slot_id):
         flash("Please select a pet.", "warning")
         return redirect(url_for('browse_vet_slots'))
 
+    # Check if already booked
     existing = VetAppointment.query.filter_by(
         slot_id=slot_id,
-        owner_id=session['user_id'],
+        pet_owner_id=session['user_id'],
         pet_id=pet_id
     ).first()
 
@@ -407,14 +413,16 @@ def apply_for_vet_service(slot_id):
         flash("You have already booked this slot.", "warning")
         return redirect(url_for('browse_vet_slots'))
 
+    # Check availability
     if slot.booked_count >= slot.max_patients:
         flash("Slot is full!", "danger")
         return redirect(url_for('browse_vet_slots'))
 
+    # ✅ CREATE BOOKING OBJECT
     booking = VetAppointment(
         slot_id=slot_id,
+        pet_owner_id=session['user_id'],
         pet_id=pet_id,
-        owner_id=session['user_id'],
         status="pending"
     )
 
@@ -449,6 +457,53 @@ def edit_appointment(appointment_id):
 
     return render_template('edit_appointment.html', appointment=appointment)
 
+@app.route('/approve-appointment/<int:appointment_id>')
+def approve_appointment(appointment_id):
+
+    if 'user_id' not in session or session['user_type'] != 'veterinary':
+        flash("Access denied", "danger")
+        return redirect(url_for('login'))
+
+    appointment = VetAppointment.query.get_or_404(appointment_id)
+
+    appointment.status = "approved"
+
+    db.session.commit()
+
+    flash("Appointment approved!", "success")
+    return redirect(url_for('vet_manage_appointments'))
+
+@app.route('/cancel-appointment/<int:appointment_id>')
+def cancel_appointment(appointment_id):
+
+    if 'user_id' not in session or session['user_type'] != 'veterinary':
+        flash("Access denied", "danger")
+        return redirect(url_for('login'))
+
+    appointment = VetAppointment.query.get_or_404(appointment_id)
+
+    appointment.status = "cancelled"
+
+    db.session.commit()
+
+    flash("Appointment rejected!", "warning")
+    return redirect(url_for('vet_manage_appointments'))
+
+@app.route('/complete-appointment/<int:appointment_id>')
+def complete_appointment(appointment_id):
+
+    if 'user_id' not in session or session['user_type'] != 'veterinary':
+        flash("Access denied", "danger")
+        return redirect(url_for('login'))
+
+    appointment = VetAppointment.query.get_or_404(appointment_id)
+
+    appointment.status = "completed"
+
+    db.session.commit()
+
+    flash("Appointment marked as completed!", "success")
+    return redirect(url_for('vet_manage_appointments'))
 
 @app.route('/products')
 def products():
