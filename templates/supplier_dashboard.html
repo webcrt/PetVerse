@@ -66,23 +66,13 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card dashboard-card text-center">
-            <div class="card-body">
-                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
-                <h5>AI Pet Care</h5>
-                <a href="{{ url_for('chatbot') }}" class="btn btn-primary">
-                    <i class="fas fa-comments me-2"></i>Get AI Advice
-                </a>
-            </div>
-        </div>
-    </div>
+
     <div class="col-md-4">
         <div class="card dashboard-card text-center">
             <div class="card-body">
                 <i class="fas fa-shipping-fast fa-3x text-warning mb-3"></i>
                 <h5>Order Management</h5>
-                <a href="#" class="btn btn-warning">
+                <a href="{{ url_for('supplier_orders') }}" class="btn btn-warning"></a>
                     <i class="fas fa-clipboard-list me-2"></i>Manage Orders
                 </a>
             </div>
@@ -119,7 +109,7 @@
                             {{ product.name }}
                         </td>
                         <td><span class="badge bg-secondary">{{ product.category.title() }}</span></td>
-                        <td>${{ product.price }}</td>
+                        <td>₹{{ product.price }}</td>
                         <td>
                             {% if product.stock_quantity > 10 %}
                                 <span class="text-success">{{ product.stock_quantity }}</span>
@@ -157,7 +147,7 @@
                                     <p><strong>Category:</strong> {{ product.category.title() }}</p>
                                     <p><strong>Brand:</strong> {{ product.brand or 'Not specified' }}</p>
                                     <p><strong>Pet Type:</strong> {{ product.pet_type.replace('_', ' ').title() }}</p>
-                                    <p><strong>Price:</strong> ${{ product.price }}</p>
+                                    <p><strong>Price:</strong> ₹{{ product.price }}</p>
                                     <p><strong>Stock:</strong> {{ product.stock_quantity }}</p>
                                     {% if product.description %}
                                         <p><strong>Description:</strong><br>{{ product.description }}</p>
@@ -194,7 +184,7 @@
                     <span class="badge bg-{{ 'success' if order.status == 'delivered' else 'warning' if order.status == 'processing' else 'info' }}">
                         {{ order.status.title() }}
                     </span>
-                    <span class="float-end">${{ order.total_amount }}</span>
+                    <span class="float-end">₹{{ order.total_amount }}</span>
                 </p>
             </div>
         </div>

@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Add Appointment Slot{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-body">
+
+                <h2 class="text-center mb-4">
+                    <i class="fas fa-calendar-plus me-2"></i>Add New Appointment Slot
+                </h2>
+
+                <!-- IMPORTANT: enctype added -->
+                <form method="POST" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
+
+                    <!-- Service Type -->
+                    <div class="mb-3">
+                        {{ form.service_type.label(class="form-label") }}
+                        {{ form.service_type(class="form-select") }}
+                    </div>
+
+                    <!-- Date & Time -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.date.label(class="form-label") }}
+                                {{ form.date(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.time.label(class="form-label") }}
+                                {{ form.time(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fee & Max Patients -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.fee.label(class="form-label") }}
+                                {{ form.fee(class="form-control") }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                {{ form.max_patients.label(class="form-label") }}
+                                {{ form.max_patients(class="form-control") }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image Upload Section -->
+                    <hr>
+                    <h5 class="mb-3">
+                        <i class="fas fa-image me-2"></i>Service Image (Optional)
+                    </h5>
+
+                    <div class="mb-3">
+                        <input type="file"
+                               name="image"
+                               class="form-control"
+                               accept="image/*"
+                               onchange="previewImage(event)">
+                        <div class="form-text">
+                            Upload a service image to display in dashboard.
+                        </div>
+                    </div>
+
+                    <!-- Preview -->
+                    <div class="text-center mb-3">
+                        <img id="imagePreview"
+                             class="img-fluid rounded shadow-sm"
+                             style="max-height:200px; display:none;">
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{{ url_for('veterinary_dashboard') }}"
+                               class="btn btn-secondary w-100">
+                                Cancel
+                            </a>
+                        </div>
+
+                        <div class="col-md-6">
+                            <button type="submit"
+                                    class="btn btn-success w-100">
+                                Create Slot
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewImage(event) {
+    const reader = new FileReader();
+    reader.onload = function(){
+        const output = document.getElementById('imagePreview');
+        output.src = reader.result;
+        output.style.display = "block";
+    };
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>
+
+{% endblock %}

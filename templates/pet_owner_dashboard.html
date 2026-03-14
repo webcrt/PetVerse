@@ -44,17 +44,24 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card dashboard-card text-center">
-            <div class="card-body">
-                <i class="fas fa-search fa-3x text-info mb-3"></i>
-                <h5>Browse Pets</h5>
+    <div class="card dashboard-card text-center">
+        <div class="card-body">
+            <i class="fas fa-search fa-3x text-info mb-3"></i>
+            <h5>Browse</h5>
+
+            <div class="d-grid gap-2 mt-3">
                 <a href="{{ url_for('browse_pets') }}" class="btn btn-info">
-                    <i class="fas fa-eye me-2"></i>Browse
+                    <i class="fas fa-paw me-2"></i>Pets
+                </a>
+
+                <a href="{{ url_for('browse_vet_slots') }}" class="btn btn-outline-info">
+                    <i class="fas fa-stethoscope me-2"></i>Veterinary
                 </a>
             </div>
         </div>
     </div>
 </div>
+
 
 <div class="row mb-4">
     <div class="col-md-3">
@@ -74,27 +81,43 @@
         </div>
     </div>
     <div class="col-md-3">
-        <div class="card dashboard-card text-center">
-            <div class="card-body">
-                <i class="fas fa-heart fa-3x text-danger mb-3"></i>
-                <h5>My Applications</h5>
+    <div class="card dashboard-card text-center">
+        <div class="card-body">
+            <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+            <h5>My Applications</h5>
+
+            <div class="d-grid gap-2 mt-3">
                 <a href="{{ url_for('my_applications') }}" class="btn btn-danger">
-                    <i class="fas fa-file-alt me-2"></i>View Applications
+                    <i class="fas fa-file-alt me-2"></i>Adoption
+                </a>
+
+                <a href="{{ url_for('my_vet_applications') }}" class="btn btn-outline-danger">
+                    <i class="fas fa-notes-medical me-2"></i>Veterinary
                 </a>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card dashboard-card text-center">
-            <div class="card-body">
-                <i class="fas fa-bell fa-3x text-warning mb-3"></i>
-                <h5>Feeding Reminders</h5>
+</div>
+
+   <div class="col-md-3">
+    <div class="card dashboard-card text-center">
+        <div class="card-body">
+            <i class="fas fa-bell fa-3x text-warning mb-3"></i>
+            <h5>Reminders</h5>
+
+            <div class="d-grid gap-2 mt-3">
                 <a href="{{ url_for('feeding_reminders') }}" class="btn btn-warning">
-                    <i class="fas fa-clock me-2"></i>Manage Reminders
+                    <i class="fas fa-utensils me-2"></i>Feeding
+                </a>
+
+                <a href="{{ url_for('vaccination_reminders') }}" class="btn btn-outline-warning">
+                    <i class="fas fa-syringe me-2"></i>Vaccination
                 </a>
             </div>
         </div>
     </div>
+</div>
+
     <div class="col-md-3">
         <div class="card dashboard-card text-center">
             <div class="card-body">

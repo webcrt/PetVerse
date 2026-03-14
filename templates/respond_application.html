@@ -26,7 +26,7 @@
                             <h4>{{ application.listing.pet_name }}</h4>
                             <p><strong>Breed:</strong> {{ application.listing.breed }}</p>
                             <p><strong>Age:</strong> {{ application.listing.age }} months</p>
-                            <p><strong>Applied:</strong> {{ application.applied_at.strftime('%B %d, %Y') }}</p>
+                            <p><strong>Applied:</strong> {{ application.application_date.strftime('%B %d, %Y') }}</p>
                             <span class="badge bg-warning">{{ application.status|title }}</span>
                         </div>
                     </div>

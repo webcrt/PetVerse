@@ -1,23 +1,41 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
-from wtforms import StringField, TextAreaField, IntegerField, FloatField, SelectField, BooleanField, PasswordField, EmailField
+from wtforms import (
+    StringField, TextAreaField, TimeField, IntegerField, FloatField,
+    SelectField, BooleanField, PasswordField, EmailField,
+    DateField, SubmitField
+)
+
 from wtforms.validators import DataRequired, Email, Length, NumberRange
+
+
 
 class LoginForm(FlaskForm):
     email = EmailField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
 
 class RegisterForm(FlaskForm):
-    name = StringField('Full Name', validators=[DataRequired(), Length(min=2, max=100)])
+    name = StringField('Full Name', validators=[DataRequired()])
     email = EmailField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Password', validators=[DataRequired(), Length(min=6)])
-    user_type = SelectField('Account Type', choices=[
-        ('pet_owner', 'Pet Owner'),
-        ('adoption_agency', 'Adoption Agency'),
-        ('supplier', 'Pet Food Supplier')
-    ], validators=[DataRequired()])
-    phone = StringField('Phone Number', validators=[Length(max=20)])
+    password = PasswordField('Password', validators=[DataRequired()])
+    phone = StringField('Phone Number')
     address = TextAreaField('Address')
+
+    user_type = SelectField(
+        'Account Type',
+        choices=[
+            ('pet_owner', 'Pet Owner'),
+            ('adoption_agency', 'Adoption Agency'),
+            ('supplier', 'Pet Food Supplier'),
+            ('veterinary', 'Veterinary / Vet Clinic'),
+        ],
+        coerce=str,                # 🔴 IMPORTANT
+        validate_choice=True,      # 🔴 IMPORTANT
+        validators=[DataRequired()]
+    )
+
+    submit = SubmitField('Register')
+
 
 class PetForm(FlaskForm):
     name = StringField('Pet Name', validators=[DataRequired(), Length(min=1, max=100)])
@@ -112,3 +130,42 @@ class ApplicationResponseForm(FlaskForm):
     ], validators=[DataRequired()])
     agency_notes = TextAreaField('Notes to Applicant', 
                                 render_kw={"placeholder": "Optional message to the applicant..."})
+    
+class VaccinationReminderForm(FlaskForm):
+    vaccine_name = StringField(
+        'Vaccine Name',
+        validators=[DataRequired(), Length(max=100)],
+        render_kw={"placeholder": "e.g., Rabies, DHPP"}
+    )
+    vaccination_date = DateField(
+        'Vaccination Date',
+        validators=[DataRequired()]
+    )
+    notes = TextAreaField(
+        'Notes',
+        render_kw={"placeholder": "Any additional instructions or vet notes"}
+    )
+    submit = SubmitField('Set Vaccination Reminder')
+
+
+class VetAppointmentSlotForm(FlaskForm):
+
+    service_type = SelectField(
+        "Service Type",
+        choices=[
+            ("vaccination", "Vaccination"),
+            ("grooming", "Grooming"),
+            ("checkup", "General Checkup"),
+            ("surgery", "Surgery"),
+            ("lab", "Lab Test")
+        ],
+        validators=[DataRequired()]
+    )
+
+    date = DateField("Available Date", validators=[DataRequired()])
+    time = TimeField("Available Time", validators=[DataRequired()])
+
+    fee = FloatField("Consultation Fee")
+    max_patients = IntegerField("Maximum Patients", default=1)
+
+    submit = SubmitField("Create Appointment Slot")

@@ -5,24 +5,22 @@
 {% block content %}
 <div class="container mt-4">
     <div class="row">
+        <!-- LEFT SIDE -->
         <div class="col-md-8">
             <div class="card">
                 <div class="card-header">
-                    <h3><i class="fas fa-credit-card"></i> Secure Checkout</h3>
+                    <h3><i class="fas fa-shopping-cart"></i> Checkout</h3>
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Demo Mode:</strong> This is a demo checkout. No actual payment will be processed.
-                    </div>
-                    
+
                     <h5 class="mb-3">Order Summary</h5>
                     {% for item in cart_items %}
                     <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                         <div class="d-flex align-items-center">
                             {% if item.product.photo_filename %}
                             <img src="{{ url_for('static', filename='uploads/' + item.product.photo_filename) }}" 
-                                 class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;" alt="{{ item.product.name }}">
+                                 class="rounded me-3" style="width: 50px; height: 50px; object-fit: cover;" 
+                                 alt="{{ item.product.name }}">
                             {% endif %}
                             <div>
                                 <strong>{{ item.product.name }}</strong>
@@ -30,135 +28,72 @@
                             </div>
                         </div>
                         <div class="text-end">
-                            <strong>${{ "%.2f"|format(item.quantity * item.product.price) }}</strong>
+                            <strong>₹{{ "%.2f"|format(item.quantity * item.product.price) }}</strong>
                         </div>
                     </div>
                     {% endfor %}
-                    
+
                     <div class="d-flex justify-content-between align-items-center py-3 border-top">
                         <h5 class="mb-0">Total</h5>
-                        <h5 class="mb-0 text-success">${{ "%.2f"|format(total) }}</h5>
+                        <h5 class="mb-0 text-success">₹{{ "%.2f"|format(total) }}</h5>
                     </div>
                 </div>
             </div>
-            
+
+            <!-- Payment Method -->
             <div class="card mt-4">
                 <div class="card-header">
-                    <h5><i class="fas fa-user"></i> Billing Information</h5>
+                    <h5><i class="fas fa-money-check-alt"></i> Payment Method</h5>
                 </div>
                 <div class="card-body">
                     <form method="POST">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Card Number</label>
-                                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456" readonly>
-                                    <small class="text-muted">Demo card number (read-only)</small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Exp. Date</label>
-                                    <input type="text" class="form-control" placeholder="12/25" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">CVV</label>
-                                    <input type="text" class="form-control" placeholder="123" readonly>
-                                </div>
-                            </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" value="COD" id="cod" checked>
+                            <label class="form-check-label" for="cod">
+                                <i class="fas fa-money-bill-wave text-success"></i> Cash on Delivery
+                            </label>
                         </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">First Name</label>
-                                    <input type="text" class="form-control" placeholder="John" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">Last Name</label>
-                                    <input type="text" class="form-control" placeholder="Doe" readonly>
-                                </div>
-                            </div>
+
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="payment_method" value="UPI" id="upi">
+                            <label class="form-check-label" for="upi">
+                                <i class="fas fa-mobile-alt text-primary"></i> UPI Payment
+                            </label>
                         </div>
-                        
-                        <div class="form-group mb-3">
-                            <label class="form-label">Billing Address</label>
-                            <input type="text" class="form-control" placeholder="123 Main Street" readonly>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">City</label>
-                                    <input type="text" class="form-control" placeholder="Anytown" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">State</label>
-                                    <input type="text" class="form-control" placeholder="NY" readonly>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group mb-3">
-                                    <label class="form-label">ZIP Code</label>
-                                    <input type="text" class="form-control" placeholder="12345" readonly>
-                                </div>
-                            </div>
-                        </div>
-                        
+
                         <div class="d-flex justify-content-between mt-4">
                             <a href="{{ url_for('view_cart') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Back to Cart
                             </a>
                             <button type="submit" class="btn btn-success btn-lg">
-                                <i class="fas fa-lock"></i> Place Order (${{ "%.2f"|format(total) }})
+                                <i class="fas fa-check-circle"></i> Place Order (₹{{ "%.2f"|format(total) }})
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
         </div>
-        
+
+        <!-- RIGHT SIDE -->
         <div class="col-md-4">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white">
-                    <h5><i class="fas fa-shield-alt"></i> Secure Payment</h5>
+            <div class="card border-info">
+                <div class="card-header bg-info text-white">
+                    <h5><i class="fas fa-info-circle"></i> Payment Info</h5>
                 </div>
                 <div class="card-body">
-                    <ul class="list-unstyled mb-3">
-                        <li><i class="fas fa-lock text-success"></i> 256-bit SSL encryption</li>
-                        <li><i class="fas fa-credit-card text-success"></i> Powered by Stripe</li>
-                        <li><i class="fas fa-shield-alt text-success"></i> PCI DSS compliant</li>
-                    </ul>
-                    
-                    <div class="text-center">
-                        <img src="https://js.stripe.com/v3/fingerprinted/img/visa-365725566f9578a9589553aa9296d178.svg" style="height: 24px; margin: 5px;">
-                        <img src="https://js.stripe.com/v3/fingerprinted/img/mastercard-4d8844094130711885b5e41b28c9848f.svg" style="height: 24px; margin: 5px;">
-                        <img src="https://js.stripe.com/v3/fingerprinted/img/amex-a49b82f46c5cd31dc8d4b7ad1ef39102.svg" style="height: 24px; margin: 5px;">
-                    </div>
+                    <p><i class="fas fa-money-bill text-success"></i> <strong>Cash on Delivery:</strong> Pay at delivery.</p>
+                    <p><i class="fas fa-mobile-alt text-primary"></i> <strong>UPI:</strong> You’ll be redirected or shown a QR code to complete payment.</p>
                 </div>
             </div>
-            
+
             <div class="card mt-3">
                 <div class="card-header">
                     <h5><i class="fas fa-truck"></i> Shipping Information</h5>
                 </div>
                 <div class="card-body">
-                    <p><i class="fas fa-shipping-fast text-primary"></i> <strong>Free shipping</strong> on orders over $50</p>
-                    <p><i class="fas fa-clock text-info"></i> Processing time: 2-3 business days</p>
+                    <p><i class="fas fa-shipping-fast text-primary"></i> Free shipping on orders over ₹50</p>
+                    <p><i class="fas fa-clock text-info"></i> Processing time: 2–3 business days</p>
                     <p><i class="fas fa-envelope text-success"></i> Order confirmation via email</p>
-                </div>
-            </div>
-            
-            <div class="card mt-3 bg-light">
-                <div class="card-body">
-                    <h6><i class="fas fa-question-circle"></i> Need Help?</h6>
-                    <p class="mb-0">Contact our support team for assistance with your order.</p>
                 </div>
             </div>
         </div>

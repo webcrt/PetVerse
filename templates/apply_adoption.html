@@ -29,7 +29,7 @@
                             <p><strong>Size:</strong> {{ listing.size|title }}</p>
                             <p><strong>Gender:</strong> {{ listing.gender|title }}</p>
                             {% if listing.adoption_fee > 0 %}
-                            <p><strong>Adoption Fee:</strong> ${{ "%.2f"|format(listing.adoption_fee) }}</p>
+                            <p><strong>Adoption Fee:</strong> ₹{{ "%.2f"|format(listing.adoption_fee) }}</p>
                             {% endif %}
                             <p class="text-muted">{{ listing.description }}</p>
                         </div>
@@ -91,7 +91,7 @@
                         </div>
                         
                         <div class="d-flex justify-content-between">
-                            <a href="{{ url_for('adoption_listings') }}" class="btn btn-secondary">
+                            <a href="{{ url_for('browse_pets') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left"></i> Back to Listings
                             </a>
                             <button type="submit" class="btn btn-primary btn-lg">

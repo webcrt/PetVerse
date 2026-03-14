@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block title %}Vaccination Reminders{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- LEFT SECTION -->
+        <div class="col-md-8">
+            <!-- SET VACCINATION REMINDER -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>
+                        <i class="fas fa-syringe me-2"></i>Set Vaccination Reminder
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST">
+                       
+                        <!-- Select Pet -->
+                        <div class="form-group mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-paw me-1"></i>Select Pet
+                            </label>
+                            <select name="pet_id" class="form-control" required>
+                                <option value="">Choose your pet...</option>
+                                {% for pet in pets %}
+                                <option value="{{ pet.id }}">{{ pet.name }} ({{ pet.breed }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Vaccination Date & Vaccine Name -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-calendar-check me-1"></i>Vaccination Date
+                                    </label>
+                                    <input type="date" name="vaccination_date" class="form-control" required>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-syringe me-1"></i>Vaccine Name
+                                    </label>
+                                    <input type="text" name="vaccine_name" class="form-control" placeholder="e.g., Rabies">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="form-group mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-notes-medical me-1"></i>Notes (optional)
+                            </label>
+                            <textarea name="notes" class="form-control" rows="3"
+                                      placeholder="Any special instructions or vet notes"></textarea>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Add Vaccination
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- UPCOMING VACCINATIONS -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>
+                        <i class="fas fa-list me-2"></i>Upcoming Vaccinations
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if reminders %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Pet</th>
+                                    <th>Date</th>
+                                    <th>Vaccine</th>
+                                    <th>Status</th>
+                                    <th>Notes</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for reminder in reminders %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ reminder.pet.name }}</strong>
+                                        <br>
+                                        <small class="text-muted">{{ reminder.pet.breed }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">
+                                            {{ reminder.vaccination_date }}
+                                        </span>
+                                    </td>
+                                    <td>{{ reminder.vaccine_name or 'Not specified' }}</td>
+                                    <td>
+                                        <span class="badge bg-warning">Pending</span>
+                                    </td>
+                                    <td>
+                                        {% if reminder.notes %}
+                                        <small>
+                                            {{ reminder.notes[:30] }}
+                                            {% if reminder.notes|length > 30 %}...{% endif %}
+                                        </small>
+                                        {% else %}
+                                        <small class="text-muted">No notes</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+    <form action="{{ url_for('delete_vaccination', reminder_id=reminder.id) }}"
+          method="post"
+          style="display:inline;"
+          onsubmit="return confirm('Delete this vaccination reminder?');">
+        <button type="submit" class="btn btn-sm btn-outline-danger">
+            <i class="fas fa-trash"></i>
+        </button>
+    </form>
+</td>
+
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-syringe fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No Upcoming Vaccinations</h5>
+                        <p class="text-muted">Add vaccination reminders to keep your pets healthy.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT SIDEBAR -->
+        <div class="col-md-4">
+            <!-- HOW IT WORKS -->
+            <div class="card bg-info text-white">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-lightbulb me-2"></i>How It Works
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ol class="mb-0">
+                        <li>Select your pet</li>
+                        <li>Choose the vaccination date</li>
+                        <li>Add vaccine details</li>
+                        <li>Get reminded before the due date</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- VACCINATION TIPS -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-user-md me-2"></i>Vaccination Tips
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check-circle text-success"></i> Keep vaccination records updated</li>
+                        <li><i class="fas fa-calendar-alt text-primary"></i> Follow vet-recommended schedules</li>
+                        <li><i class="fas fa-shield-alt text-warning"></i> Don’t miss booster doses</li>
+                        <li><i class="fas fa-hospital text-danger"></i> Consult your vet when unsure</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- YOUR PETS -->
+            {% if pets %}
+            <div class="card mt-3 bg-light">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-paw me-2"></i>Your Pets
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for pet in pets %}
+                    <div class="d-flex align-items-center mb-2">
+                        {% if pet.photo_filename %}
+                        <img src="{{ url_for('static', filename='uploads/' + pet.photo_filename) }}"
+                             class="rounded-circle me-3"
+                             style="width: 40px; height: 40px; object-fit: cover;"
+                             alt="{{ pet.name }}">
+                        {% else %}
+                        <div class="bg-secondary rounded-circle me-3 d-flex align-items-center justify-content-center"
+                             style="width: 40px; height: 40px;">
+                            <i class="fas fa-paw text-white"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <strong>{{ pet.name }}</strong>
+                            <br>
+                            <small class="text-muted">
+                                {{ pet.breed }} • {{ pet.age }} months
+                            </small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

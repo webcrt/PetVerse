@@ -57,17 +57,7 @@
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card dashboard-card text-center">
-            <div class="card-body">
-                <i class="fas fa-robot fa-3x text-primary mb-3"></i>
-                <h5>AI Pet Care</h5>
-                <a href="{{ url_for('chatbot') }}" class="btn btn-primary">
-                    <i class="fas fa-comments me-2"></i>Get AI Advice
-                </a>
-            </div>
-        </div>
-    </div>
+    
     <div class="col-md-4">
         <div class="card dashboard-card text-center">
             <div class="card-body">
@@ -116,7 +106,7 @@
                     <strong>Age:</strong> {{ listing.age }} months<br>
                     <strong>Size:</strong> {{ listing.size.title() }}<br>
                     {% if listing.adoption_fee %}
-                        <strong>Fee:</strong> ${{ listing.adoption_fee }}
+                        <strong>Fee:</strong> ₹{{ listing.adoption_fee }}
                     {% endif %}
                 </p>
                 <div class="btn-group w-100">

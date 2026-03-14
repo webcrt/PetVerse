@@ -1,0 +1,11 @@
+flask
+flask_sqlalchemy
+flask_wtf
+werkzeug
+stripe
+google-genai
+python-dotenv
+email_validator
+flask-migrateflask
+apscheduler
+flask-login

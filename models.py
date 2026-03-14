@@ -1,4 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
+import stripe
 from datetime import datetime
 
 db = SQLAlchemy()
@@ -74,9 +75,10 @@ class Order(db.Model):
     customer_phone = db.Column(db.String(20))
     customer_address = db.Column(db.Text, nullable=False)
     total_amount = db.Column(db.Float, nullable=False)
+    payment_method = db.Column(db.String(20), nullable=False, default="COD")  # COD / UPI
     status = db.Column(db.String(20), default='pending')  # pending, processing, shipped, delivered
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
+
     # Relationships
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
 
@@ -86,6 +88,11 @@ class OrderItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     unit_price = db.Column(db.Float, nullable=False)
+    supplier_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    # ✅ New column
+    status = db.Column(db.String(20), default='pending')  # pending, processing, shipped, delivered
+
 
 class ChatMessage(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -149,6 +156,23 @@ class FeedingReminder(db.Model):
     # Relationships
     pet = db.relationship('Pet', backref='feeding_reminders')
     owner = db.relationship('User', backref='feeding_reminders')
+    
+class VaccinationReminder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id'), nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    vaccine_name = db.Column(db.String(100), nullable=False)
+    vaccination_date = db.Column(db.Date, nullable=False)
+    notes = db.Column(db.Text)
+
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_sent = db.Column(db.DateTime)
+
+    # Relationships
+    pet = db.relationship('Pet', backref='vaccination_reminders')
+    owner = db.relationship('User', backref='vaccination_reminders')
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -162,3 +186,39 @@ class Notification(db.Model):
     
     # Relationships
     user = db.relationship('User', backref='notifications')
+
+class VetAppointmentSlot(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    vet_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    service_type = db.Column(db.String(100), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    time = db.Column(db.Time, nullable=False)
+
+    fee = db.Column(db.Float)
+    max_patients = db.Column(db.Integer, default=1)
+    booked_count = db.Column(db.Integer, default=0)
+
+    status = db.Column(db.String(50), default="Available")
+
+    image = db.Column(db.String(200))   # 👈 ADD THIS
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class VetAppointment(db.Model):
+    __tablename__ = 'vet_appointment'
+
+    id = db.Column(db.Integer, primary_key=True)
+
+    slot_id = db.Column(db.Integer, db.ForeignKey('vet_appointment_slot.id'), nullable=False)
+    pet_owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id'), nullable=False)  # ADD THIS
+
+    status = db.Column(db.String(50), default="Booked")
+    created_at = db.Column(db.DateTime, default=db.func.current_timestamp())
+
+    # Relationships
+    slot = db.relationship('VetAppointmentSlot', backref='appointments')
+    owner = db.relationship('User', backref='vet_appointments')
+    pet = db.relationship('Pet', backref='vet_appointments')  # ADD THIS

@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Edit Appointment Slot{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-4">
+        <i class="fas fa-edit me-2"></i>Edit Appointment Slot
+    </h3>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+
+            <form method="POST" enctype="multipart/form-data">
+
+                <!-- Service Type -->
+                <div class="mb-3">
+                    <label class="form-label">Service Type</label>
+                    <input type="text"
+                           name="service_type"
+                           class="form-control"
+                           value="{{ slot.service_type }}"
+                           required>
+                </div>
+
+                <!-- Date -->
+                <div class="mb-3">
+                    <label class="form-label">Date</label>
+                    <input type="date"
+                           name="date"
+                           class="form-control"
+                           value="{{ slot.date }}"
+                           required>
+                </div>
+
+                <!-- Time -->
+                <div class="mb-3">
+                    <label class="form-label">Time</label>
+                    <input type="time"
+                           name="time"
+                           class="form-control"
+                           value="{{ slot.time }}"
+                           required>
+                </div>
+
+                <!-- Fee -->
+                <div class="mb-3">
+                    <label class="form-label">Consultation Fee (₹)</label>
+                    <input type="number"
+                           name="fee"
+                           step="0.01"
+                           class="form-control"
+                           value="{{ slot.fee }}">
+                </div>
+
+                <!-- Max Patients -->
+                <div class="mb-3">
+                    <label class="form-label">Maximum Patients</label>
+                    <input type="number"
+                           name="max_patients"
+                           class="form-control"
+                           value="{{ slot.max_patients }}">
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mb-3">
+                    <label class="form-label">Service Image (Optional)</label>
+                    <input type="file"
+                           name="image"
+                           class="form-control">
+                </div>
+
+                <!-- Buttons -->
+                <div class="d-flex justify-content-between">
+                    <a href="{{ url_for('veterinary_dashboard') }}"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+
+                    <button type="submit"
+                            class="btn btn-primary">
+                        Update Slot
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}

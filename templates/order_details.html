@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Order Details{% endblock %}
+
+{% block content %}
+<div class="container mt-5 mb-5">
+    <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h4 class="mb-0"><i class="fas fa-receipt me-2"></i>Order Details</h4>
+            <a href="{{ url_for('my_orders') }}" class="btn-back">← Back to Orders</a>
+        </div>
+
+        <div class="card-body">
+            <h5 class="text-primary">Order ID: {{ order.id }}</h5>
+            <p><strong>Date:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+            <p><strong>Status:</strong> {{ order.status }}</p>
+            <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+
+            <hr>
+
+            <h5>Items:</h5>
+            <table class="table table-bordered mt-3">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Price (₹)</th>
+                        <th>Quantity</th>
+                        <th>Total (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ "%.2f"|format(item.unit_price) }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ "%.2f"|format(item.unit_price * item.quantity) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h5 class="total-amount mt-4">
+                Total Amount: ₹{{ "%.2f"|format(order.total_amount) }}
+            </h5>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    background-color: #ffffff;
+}
+
+.card-header {
+    background-color: #007bff; /* Pet Care Connect Blue */
+    color: #fff;
+    font-weight: bold;
+    padding: 15px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+.btn-back {
+    background-color: #f8f9fa;
+    color: #007bff;
+    border: 1px solid #007bff;
+    padding: 6px 12px;
+    border-radius: 6px;
+    transition: 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-back:hover {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.table thead {
+    background-color: #e8f3ff; /* Light blue tint for harmony */
+    color: #003366;
+    font-weight: 600;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.total-amount {
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: right;
+    color: #007bff;
+}
+</style>
+{% endblock %}

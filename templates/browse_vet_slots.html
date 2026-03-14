@@ -1,0 +1,257 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Veterinary Services - Pet Care Connect{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-stethoscope me-2"></i>Find Veterinary Services
+        </h2>
+    </div>
+</div>
+
+<!-- ========================= -->
+<!-- Filter Section -->
+<!-- ========================= -->
+<div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <form method="GET" class="row g-3">
+
+            <div class="col-md-4">
+                <label class="form-label">Service Name</label>
+                <input type="text"
+                       class="form-control"
+                       name="service"
+                       value="{{ service_filter }}"
+                       placeholder="Vaccination, Surgery, Checkup">
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Location</label>
+                <input type="text"
+                       class="form-control"
+                       name="location"
+                       value="{{ location_filter }}"
+                       placeholder="Clinic location">
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">
+                    <i class="fas fa-search me-2"></i>Filter
+                </button>
+
+                <a href="{{ url_for('browse_vet_slots') }}"
+                   class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>Clear
+                </a>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+
+<!-- ========================= -->
+<!-- Results Section -->
+<!-- ========================= -->
+{% if slots.items %}
+<div class="row">
+
+    {% for slot in slots.items %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+
+            <!-- Service Image -->
+            {% if slot.image %}
+                <img src="{{ url_for('static', filename='uploads/' ~ slot.image) }}"
+                     class="card-img-top"
+                     style="height:220px; object-fit:cover;">
+            {% else %}
+                <div class="card-img-top bg-light d-flex align-items-center justify-content-center"
+                     style="height:220px;">
+                    <i class="fas fa-stethoscope fa-3x text-muted"></i>
+                </div>
+            {% endif %}
+
+            <div class="card-body d-flex flex-column">
+
+                <!-- Title -->
+                <h5 class="card-title">
+                    {{ slot.service_type }}
+
+                    {% if slot.status == "Available" %}
+                        <span class="badge bg-success ms-2">Available</span>
+                    {% else %}
+                        <span class="badge bg-secondary ms-2">Closed</span>
+                    {% endif %}
+                </h5>
+
+                <!-- Details -->
+                <p class="card-text flex-grow-1 small text-muted">
+                    <strong>Date:</strong> {{ slot.date }}<br>
+                    <strong>Time:</strong> {{ slot.time }}<br>
+                    <strong>Fee:</strong> ₹{{ slot.fee }}<br>
+                    <strong>Available Slots:</strong>
+                    {{ slot.max_patients - slot.booked_count }} /
+                    {{ slot.max_patients }}
+                </p>
+
+                <!-- View Button -->
+                <div class="mt-auto">
+                    <button class="btn btn-primary w-100"
+                            data-bs-toggle="modal"
+                            data-bs-target="#vetModal{{ slot.id }}">
+                        <i class="fas fa-eye me-2"></i>View Details
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================= -->
+    <!-- Modal -->
+    <!-- ========================= -->
+    <div class="modal fade" id="vetModal{{ slot.id }}" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        {{ slot.service_type }} - Details
+                    </h5>
+                    <button type="button"
+                            class="btn-close"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    {% if slot.image %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ slot.image) }}"
+                             class="img-fluid mb-3 rounded">
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-calendar me-2"></i>Schedule</h6>
+                            <p><strong>Date:</strong> {{ slot.date }}</p>
+                            <p><strong>Time:</strong> {{ slot.time }}</p>
+                        </div>
+
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-info-circle me-2"></i>Service Info</h6>
+                            <p><strong>Fee:</strong> ₹{{ slot.fee }}</p>
+                            <p><strong>Maximum Patients:</strong> {{ slot.max_patients }}</p>
+                            <p><strong>Booked:</strong> {{ slot.booked_count }}</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <button class="btn btn-outline-secondary"
+                            data-bs-dismiss="modal">
+                        Close
+                    </button>
+
+                    {% if session.user_type == 'pet_owner' %}
+                        {% if slot.status == "Available" %}
+                            <a href="{{ url_for('apply_for_vet_service', slot_id=slot.id) }}"
+                               class="btn btn-success">
+                                <i class="fas fa-calendar-check me-2"></i>Book Appointment
+                            </a>
+                        {% else %}
+                            <span class="badge bg-secondary fs-6">
+                                Fully Booked
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        <a href="{{ url_for('login') }}"
+                           class="btn btn-success">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login to Book
+                        </a>
+                    {% endif %}
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% endfor %}
+</div>
+
+
+<!-- ========================= -->
+<!-- Pagination -->
+<!-- ========================= -->
+{% if slots.pages > 1 %}
+<nav>
+    <ul class="pagination justify-content-center">
+
+        {% if slots.has_prev %}
+        <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('browse_vet_slots',
+                                page=slots.prev_num,
+                                service=service_filter,
+                                location=location_filter) }}">
+                Previous
+            </a>
+        </li>
+        {% endif %}
+
+        {% for page_num in slots.iter_pages() %}
+            {% if page_num %}
+                {% if page_num != slots.page %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="{{ url_for('browse_vet_slots',
+                                            page=page_num,
+                                            service=service_filter,
+                                            location=location_filter) }}">
+                            {{ page_num }}
+                        </a>
+                    </li>
+                {% else %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ page_num }}</span>
+                    </li>
+                {% endif %}
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">...</span>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        {% if slots.has_next %}
+        <li class="page-item">
+            <a class="page-link"
+               href="{{ url_for('browse_vet_slots',
+                                page=slots.next_num,
+                                service=service_filter,
+                                location=location_filter) }}">
+                Next
+            </a>
+        </li>
+        {% endif %}
+
+    </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<!-- No Results -->
+<div class="text-center py-5">
+    <i class="fas fa-stethoscope fa-5x text-muted mb-4"></i>
+    <h4>No Veterinary Services Found</h4>
+    <p class="text-muted">Try adjusting your filters.</p>
+</div>
+{% endif %}
+
+{% endblock %}

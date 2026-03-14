@@ -47,7 +47,7 @@
                                 <br><small class="text-muted">{{ app.applicant_phone }}</small>
                                 {% endif %}
                             </td>
-                            <td>{{ app.applied_at.strftime('%B %d, %Y') }}</td>
+                            <td>{{ app.application_date.strftime('%B %d, %Y') }}</td>
                             <td>
                                 {% if app.status == 'pending' %}
                                     <span class="badge bg-warning text-dark">

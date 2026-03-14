@@ -66,7 +66,7 @@
                     <strong>Gender:</strong> {{ listing.gender.title() }}<br>
                     <strong>Size:</strong> {{ listing.size.title() }}
                     {% if listing.adoption_fee and listing.adoption_fee > 0 %}
-                        <br><strong>Adoption Fee:</strong> ${{ listing.adoption_fee }}
+                        <br><strong>Adoption Fee:</strong> ₹{{ listing.adoption_fee }}
                     {% endif %}
                 </p>
                 

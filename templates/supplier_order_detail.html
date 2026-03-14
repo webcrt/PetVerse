@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Order {{ order.order_number }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>🧾 Order Details - {{ order.order_number }}</h2>
+
+    <div class="card my-4">
+        <div class="card-header">Customer Information</div>
+        <div class="card-body">
+            <p><strong>Name:</strong> {{ order.customer_name }}</p>
+            <p><strong>Email:</strong> {{ order.customer_email }}</p>
+            <p><strong>Phone:</strong> {{ order.customer_phone }}</p>
+            <p><strong>Address:</strong> {{ order.customer_address }}</p>
+        </div>
+    </div>
+
+    <div class="card my-4">
+        <div class="card-header">Order Information</div>
+        <div class="card-body">
+            <p><strong>Total Amount:</strong> ₹{{ order.total_amount }}</p>
+            <p><strong>Payment Method:</strong> {{ order.payment_method }}</p>
+            <p><strong>Status:</strong> {{ order.status }}</p>
+            <p><strong>Placed On:</strong> {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+        </div>
+    </div>
+
+    <div class="card my-4">
+        <div class="card-header">Ordered Items</div>
+        <div class="card-body">
+            {% if order.items %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Unit Price (₹)</th>
+                        <th>Subtotal (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit_price }}</td>
+                        <td>{{ item.quantity * item.unit_price }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No items found for this order.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <a href="{{ url_for('supplier_orders') }}" class="btn btn-secondary">Back to Orders</a>
+</div>
+{% endblock %}

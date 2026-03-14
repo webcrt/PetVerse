@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Supplier Orders{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">📦 Manage Orders</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    <div class="alert alert-dismissible fade show" role="alert">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+    {% endwith %}
+
+    {% if orders %}
+    <table class="table table-bordered table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Order #</th>
+                <th>Customer</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Total (₹)</th>
+                <th>Payment Method</th>
+                <th>Status (Your Items)</th>
+                <th>Placed On</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td><a href="{{ url_for('supplier_order_detail', order_id=order.id) }}">{{ order.order_number }}</a></td>
+                <td>{{ order.customer_name }}</td>
+                <td>{{ order.customer_email }}</td>
+                <td>{{ order.customer_phone }}</td>
+                <td>{{ order.total_amount }}</td>
+                <td>{{ order.payment_method }}</td>
+                <td>
+                    <form action="{{ url_for('update_order_status', order_id=order.id) }}" method="POST" class="d-flex">
+                        <select name="status" class="form-select form-select-sm">
+                           <option value="pending" {% if order.supplier_status == 'pending' %}selected{% endif %}>Pending</option>
+<option value="processing" {% if order.supplier_status == 'processing' %}selected{% endif %}>Processing</option>
+<option value="shipped" {% if order.supplier_status == 'shipped' %}selected{% endif %}>Shipped</option>
+<option value="delivered" {% if order.supplier_status == 'delivered' %}selected{% endif %}>Delivered</option>
+
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary ms-2">Update</button>
+                    </form>
+                </td>
+                <td>{{ order.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td>
+                    <a href="{{ url_for('supplier_order_detail', order_id=order.id) }}" class="btn btn-sm btn-info">View</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No orders found.</p>
+    {% endif %}
+</div>
+{% endblock %}
