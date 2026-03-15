@@ -8,7 +8,7 @@ from typing import List, Dict, Optional
 SMTP_SERVER = "smtp.gmail.com"
 SMTP_PORT = 587
 SMTP_USERNAME = "achu50002@gmail.com"
-SMTP_PASSWORD = "mggn qywj ibkf knni"  # Use Gmail App Password, not your real password!
+SMTP_PASSWORD = "yirp sdwp eidn xubt"  # Use Gmail App Password, not your real password!
 
 
 def send_email(to: str, subject: str, text: Optional[str] = None, html: Optional[str] = None, cc: Optional[str] = None) -> Dict[str, str]:
