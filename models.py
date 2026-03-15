@@ -1,6 +1,6 @@
 from flask_sqlalchemy import SQLAlchemy
 import stripe
-from datetime import datetime
+from datetime import datetime, date
 
 db = SQLAlchemy()
 
@@ -224,4 +224,21 @@ class VetAppointment(db.Model):
     slot = db.relationship('VetAppointmentSlot', backref='appointments')
     owner = db.relationship('User', backref='vet_appointments')
     pet = db.relationship('Pet', backref='vet_appointments')  # ADD THIS
-    
+
+class MedicalRecord(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+
+    pet_id = db.Column(db.Integer, db.ForeignKey('pet.id'), nullable=False)
+    vet_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    diagnosis = db.Column(db.Text)
+    treatment = db.Column(db.Text)
+    prescription = db.Column(db.Text)
+
+    visit_date = db.Column(db.Date, default=date.today)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Relationships
+    pet = db.relationship('Pet', backref='medical_records')
+    vet = db.relationship('User')   

@@ -18,7 +18,7 @@ from email_utils import send_vaccination_reminder
 from models import (
     db, User, Pet, AdoptionListing, Product, Order,
     ChatMessage, AdoptionApplication, Cart, CartItem,
-    FeedingReminder, VaccinationReminder, Notification, VetAppointmentSlot, VetAppointment
+    FeedingReminder, VaccinationReminder, Notification, VetAppointmentSlot, VetAppointment, MedicalRecord
 )
 
 from forms import (
@@ -225,8 +225,12 @@ def supplier_dashboard():
 
 from sqlalchemy.orm import joinedload
 
+from datetime import date
+from sqlalchemy.orm import joinedload
+
 @app.route('/veterinary-dashboard')
 def veterinary_dashboard():
+
     if 'user_id' not in session or session['user_type'] != 'veterinary':
         flash('Access denied', 'error')
         return redirect(url_for('login'))
@@ -243,23 +247,63 @@ def veterinary_dashboard():
 
     # Get appointments booked for this vet
     appointments = (
-    VetAppointment.query
-    .join(VetAppointmentSlot)
-    .filter(VetAppointmentSlot.vet_id == user.id)
-    .options(
-        joinedload(VetAppointment.slot),
-        joinedload(VetAppointment.pet),
-        joinedload(VetAppointment.owner)
+        VetAppointment.query
+        .join(VetAppointmentSlot)
+        .filter(VetAppointmentSlot.vet_id == user.id)
+        .options(
+            joinedload(VetAppointment.slot),
+            joinedload(VetAppointment.pet),
+            joinedload(VetAppointment.owner)
+        )
+        .all()
     )
-    .all()
-)
+
+    # ✅ Auto mark completed appointments
+    for appointment in appointments:
+        if appointment.slot.date < date.today() and appointment.status == "Pending":
+            appointment.status = "Completed"
+
+    db.session.commit()
 
     return render_template(
         'veterinary_dashboard.html',
         user=user,
         slots=appointment_slots,
-        appointments=appointments   # ✅ ADD THIS
+        appointments=appointments
     )
+
+@app.route('/complete-appointment/<int:appointment_id>')
+def mark_appointment_completed(appointment_id):
+
+    appointment = VetAppointment.query.get_or_404(appointment_id)
+    appointment.status = "Completed"
+
+    db.session.commit()
+
+    flash("Appointment marked as completed", "success")
+    return redirect(url_for('veterinary_dashboard'))
+
+@app.route("/cancel-appointment/<int:id>")
+def cancel_appointment(id):
+
+    appointment = VetAppointment.query.get_or_404(id)
+    appointment.status = "Cancelled"
+
+    db.session.commit()
+
+    flash("Appointment cancelled", "warning")
+    return redirect(url_for("veterinary_dashboard"))
+
+@app.route("/delete-vet-appointment/<int:id>")
+def delete_vet_appointment(id):
+
+    appointment = VetAppointment.query.get_or_404(id)
+
+    db.session.delete(appointment)
+    db.session.commit()
+
+    flash("Appointment removed", "success")
+    return redirect(url_for("veterinary_dashboard"))
 
 @app.route('/close-slot/<int:slot_id>')
 def close_slot(slot_id):
@@ -473,21 +517,28 @@ def approve_appointment(appointment_id):
     flash("Appointment approved!", "success")
     return redirect(url_for('vet_manage_appointments'))
 
-@app.route('/cancel-appointment/<int:appointment_id>')
-def cancel_appointment(appointment_id):
+@app.route("/cancel-vet-appointment/<int:id>")
+def cancel_vet_appointment(id):
 
-    if 'user_id' not in session or session['user_type'] != 'veterinary':
-        flash("Access denied", "danger")
-        return redirect(url_for('login'))
+    appointment = VetAppointment.query.get_or_404(id)
 
-    appointment = VetAppointment.query.get_or_404(appointment_id)
+    if appointment.pet_owner_id != session['user_id']:
+        flash("Unauthorized action", "danger")
+        return redirect(url_for('my_vet_applications'))
 
-    appointment.status = "cancelled"
+    # Change appointment status
+    appointment.status = "Cancelled"
+
+    # Reopen the slot
+    slot = appointment.slot
+    if slot.booked_count > 0:
+        slot.booked_count -= 1
 
     db.session.commit()
 
-    flash("Appointment rejected!", "warning")
-    return redirect(url_for('vet_manage_appointments'))
+    flash("Appointment cancelled and slot reopened", "success")
+
+    return redirect(url_for('my_vet_applications'))
 
 @app.route('/complete-appointment/<int:appointment_id>')
 def complete_appointment(appointment_id):
@@ -1428,9 +1479,44 @@ def vet_manage_appointments():
         appointments=appointments
     )
 
-@app.route('/medical-records')
+@app.route("/medical-records")
 def medical_records():
-    return render_template('medical_records.html')
+
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+
+    records = MedicalRecord.query.join(Pet).filter(
+        Pet.owner_id == session['user_id']
+    ).order_by(MedicalRecord.visit_date.desc()).all()
+
+    return render_template(
+        "medical_records.html",
+        records=records
+    )
+
+@app.route("/add-medical-record/<int:pet_id>", methods=["GET","POST"])
+def add_medical_record(pet_id):
+
+    if request.method == "POST":
+
+        record = MedicalRecord(
+            pet_id=pet_id,
+            vet_id=session['user_id'],
+            diagnosis=request.form['diagnosis'],
+            treatment=request.form['treatment'],
+            prescription=request.form['prescription']
+        )
+
+        db.session.add(record)
+        db.session.commit()
+
+        flash("Medical record added successfully","success")
+
+        return redirect(url_for("vet_dashboard"))
+
+    pet = Pet.query.get_or_404(pet_id)
+
+    return render_template("add_medical_record.html", pet=pet)
 
 if __name__ == '__main__': 
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

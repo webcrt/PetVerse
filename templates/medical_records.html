@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Records{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="card">
+<div class="card-header">
+<h3><i class="fas fa-file-medical"></i> My Pet Medical Records</h3>
+</div>
+
+<div class="card-body">
+
+{% if records %}
+
+<table class="table table-striped">
+
+<thead class="table-success">
+<tr>
+<th>Pet</th>
+<th>Veterinarian</th>
+<th>Diagnosis</th>
+<th>Prescription</th>
+<th>Date</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for record in records %}
+
+<tr>
+
+<td>
+<strong>{{ record.pet.name }}</strong><br>
+<small>{{ record.pet.breed }}</small>
+</td>
+
+<td>
+{{ record.vet.name }}
+</td>
+
+<td>
+{{ record.diagnosis }}
+</td>
+
+<td>
+{{ record.prescription }}
+</td>
+
+<td>
+{{ record.visit_date }}
+</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+{% else %}
+
+<div class="text-center py-5">
+<i class="fas fa-file-medical fa-4x text-muted mb-3"></i>
+<h4>No Medical Records Yet</h4>
+<p class="text-muted">Veterinarians will add records after consultation.</p>
+</div>
+
+{% endif %}
+
+</div>
+</div>
+
+</div>
+
+{% endblock %}

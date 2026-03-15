@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}Add Medical Record{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+<div class="card">
+
+<div class="card-header">
+<h4>Add Medical Record - {{ pet.name }}</h4>
+</div>
+
+<div class="card-body">
+
+<form method="POST">
+
+<div class="mb-3">
+<label>Diagnosis</label>
+<textarea name="diagnosis" class="form-control" required></textarea>
+</div>
+
+<div class="mb-3">
+<label>Treatment</label>
+<textarea name="treatment" class="form-control"></textarea>
+</div>
+
+<div class="mb-3">
+<label>Prescription</label>
+<textarea name="prescription" class="form-control"></textarea>
+</div>
+
+<button type="submit" class="btn btn-success">
+Save Record
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+</div>
+
+{% endblock %}
