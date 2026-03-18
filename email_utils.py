@@ -55,7 +55,7 @@ Reminder Details:
 Don't forget to give your furry friend some love along with their meal! 🐾
 
 Best regards,
-Pet Care Connect
+Pet verse.
     """
     return send_email(owner_email, subject, text)
 
@@ -75,7 +75,7 @@ Notes: {notes or 'No additional notes'}
 Please ensure timely vaccination to keep your pet healthy 🐾
 
 Regards,
-Pet Care Connect
+Pet verse.
     """
     return send_email(owner_email, subject, text)
 
@@ -90,7 +90,7 @@ You have received a new adoption application from {applicant_name} for {pet_name
 Application ID: #{application_id}
 
 Best regards,
-Pet Care Connect Team
+Pet verse Team
     """
     return send_email(agency_email, subject, text)
 
@@ -106,7 +106,7 @@ Your adoption application for {pet_name} has been APPROVED!
 Agency Notes: {agency_notes or 'None'}
 
 Best regards,
-Pet Care Connect Team
+Pet verse Team
         """
     else:
         subject = f"ℹ️ Update on your adoption application for {pet_name}"
@@ -119,7 +119,7 @@ Agency Notes: {agency_notes or 'None'}
 Don't give up—there are many pets waiting for loving homes.
 
 Best regards,
-Pet Care Connect Team
+Pet verse Team
         """
     return send_email(applicant_email, subject, text)
 
@@ -140,6 +140,84 @@ Items Ordered:
 Your order is being processed and you'll receive tracking information soon.
 
 Best regards,
-Pet Care Connect Team
+Pet verse Team
     """
     return send_email(customer_email, subject, text)
+
+
+def send_vet_booking_confirmation(owner_email: str, owner_name: str, pet_name: str, service: str, date: str, time: str):
+    subject = f"🐾 Vet Appointment Confirmed for {pet_name}"
+
+    text = f"""
+Hello {owner_name},
+
+Your veterinary appointment has been successfully booked.
+
+Pet: {pet_name}
+Service: {service}
+Date: {date}
+Time: {time}
+
+Please arrive 10 minutes early.
+
+Regards,
+Pet verse Team
+    """
+
+    return send_email(owner_email, subject, text)
+
+
+def send_vet_reminder(owner_email: str, owner_name: str, pet_name: str, service: str, date: str, time: str):
+    subject = f"⏰ Reminder: Vet Appointment for {pet_name}"
+
+    text = f"""
+Hello {owner_name},
+
+This is a reminder for your pet's appointment.
+
+Pet: {pet_name}
+Service: {service}
+Date: {date}
+Time: {time}
+
+Please don’t miss it 🐾
+
+Regards,
+Pet verse Team
+    """
+
+    return send_email(owner_email, subject, text)
+
+
+def send_vet_completed(owner_email: str, owner_name: str, pet_name: str):
+    subject = f"✅ Appointment Completed for {pet_name}"
+
+    text = f"""
+Hello {owner_name},
+
+Your veterinary appointment for {pet_name} has been completed.
+
+We hope your pet is doing well 🐾
+
+Regards,
+Pet verse Team
+    """
+
+    return send_email(owner_email, subject, text)
+
+
+def send_vet_cancelled(owner_email: str, owner_name: str, pet_name: str):
+    subject = f"❌ Appointment Cancelled for {pet_name}"
+
+    text = f"""
+Hello {owner_name},
+
+Your appointment for {pet_name} has been cancelled.
+
+You can book another slot anytime.
+
+Regards,
+Pet verse Team
+    """
+
+    return send_email(owner_email, subject, text)

@@ -8,6 +8,8 @@ from zoneinfo import ZoneInfo
 from models import VaccinationReminder, User
 from email_utils import send_vaccination_reminder
 from datetime import date
+from models import VetAppointment
+from email_utils import send_vet_reminder
 
 # Use Indian timezone
 LOCAL_TZ = ZoneInfo("Asia/Kolkata")
@@ -122,4 +124,49 @@ def schedule_vaccination_jobs(app):
         id="vaccination_reminder_job",
         replace_existing=True,
     )
-              
+
+
+def check_and_send_vet_reminders(app):
+    """Send vet appointment reminders (same day)."""
+    with app.app_context():
+        today = date.today()
+
+        appointments = VetAppointment.query.filter(
+            VetAppointment.status == "approved"
+        ).all()
+
+        for appt in appointments:
+            try:
+                appointment_date = appt.slot.date
+
+                if appointment_date == today:
+                    user = appt.owner
+
+                    current_app.logger.info(
+                        f"🐾 Sending vet reminder | Pet={appt.pet.name}"
+                    )
+
+                    send_vet_reminder(
+                        owner_email=user.email,
+                        owner_name=user.name,
+                        pet_name=appt.pet.name,
+                        service=appt.slot.service_type,
+                        date=appt.slot.date.strftime("%d %b %Y"),
+                        time=appt.slot.time
+                    )
+
+            except Exception as e:
+                current_app.logger.error(
+                    f"❌ Vet reminder failed for appointment {appt.id}: {e}"
+                )
+                
+def schedule_vet_jobs(app):
+    """Run vet reminder checker every minute."""
+    scheduler.add_job(
+        func=check_and_send_vet_reminders,
+        trigger="interval",
+        minutes=1,
+        args=[app],
+        id="vet_reminder_job",
+        replace_existing=True,
+    )

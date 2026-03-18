@@ -40,7 +40,8 @@ from email_utils import (
 from scheduler import (
     scheduler,
     schedule_pet_feeding_jobs,
-    schedule_vaccination_jobs
+    schedule_vaccination_jobs,
+    schedule_vet_jobs
 )
 
 
@@ -80,6 +81,7 @@ stripe.api_key = os.environ.get('STRIPE_SECRET_KEY')
 with app.app_context():
     schedule_pet_feeding_jobs(app)
     schedule_vaccination_jobs(app)
+    schedule_vet_jobs
 
 if not scheduler.running:
     scheduler.start()
@@ -478,6 +480,20 @@ def apply_for_vet_service(slot_id):
     db.session.add(booking)
     db.session.commit()
 
+    from email_utils import send_vet_booking_confirmation
+
+    user = User.query.get(session['user_id'])
+    pet = Pet.query.get(pet_id)
+
+    send_vet_booking_confirmation(
+    user.email,
+    user.name,
+    pet.name,
+    slot.service_type,
+    slot.date,
+    slot.time
+    )
+
     flash("Appointment booked successfully!", "success")
     return redirect(url_for('browse_vet_slots'))
 
@@ -514,6 +530,18 @@ def approve_appointment(appointment_id):
 
     db.session.commit()
 
+    from email_utils import send_vet_booking_confirmation
+
+# ✅ SEND APPROVAL EMAIL
+    send_vet_booking_confirmation(
+    appointment.owner.email,
+    appointment.owner.name,
+    appointment.pet.name,
+    appointment.slot.service_type,
+    appointment.slot.date,
+    appointment.slot.time
+    )
+
     flash("Appointment approved!", "success")
     return redirect(url_for('vet_manage_appointments'))
 
@@ -536,6 +564,15 @@ def cancel_vet_appointment(id):
 
     db.session.commit()
 
+    from email_utils import send_vet_cancelled
+
+# ✅ SEND CANCEL EMAIL
+    send_vet_cancelled(
+    appointment.owner.email,
+    appointment.owner.name,
+    appointment.pet.name
+    )
+
     flash("Appointment cancelled and slot reopened", "success")
 
     return redirect(url_for('my_vet_applications'))
@@ -552,6 +589,15 @@ def complete_appointment(appointment_id):
     appointment.status = "completed"
 
     db.session.commit()
+
+    from email_utils import send_vet_completed
+
+# ✅ SEND COMPLETION EMAIL
+    send_vet_completed(
+    appointment.owner.email,
+    appointment.owner.name,
+    appointment.pet.name
+    )
 
     flash("Appointment marked as completed!", "success")
     return redirect(url_for('vet_manage_appointments'))
@@ -1512,11 +1558,65 @@ def add_medical_record(pet_id):
 
         flash("Medical record added successfully","success")
 
-        return redirect(url_for("vet_dashboard"))
+        return redirect(url_for("veterinary_dashboard"))
 
     pet = Pet.query.get_or_404(pet_id)
 
     return render_template("add_medical_record.html", pet=pet)
+
+@app.route("/vet-medical-records")
+def vet_medical_records():
+
+    vet_id = session.get('user_id')
+
+    search = request.args.get('search')
+    date = request.args.get('date')
+    pet_id = request.args.get('pet_id')
+
+    query = MedicalRecord.query.filter_by(vet_id=vet_id)
+
+    # 🔍 Search by pet name
+    if search:
+        query = query.join(Pet).filter(Pet.name.ilike(f"%{search}%"))
+
+    # 📅 Filter by date
+    if date:
+        query = query.filter(db.func.date(MedicalRecord.visit_date) == date)
+
+    # 🐾 Filter by pet
+    if pet_id:
+        query = query.filter(MedicalRecord.pet_id == pet_id)
+
+    records = query.order_by(MedicalRecord.visit_date.desc()).all()
+
+    # Get pets for dropdown
+    pets = Pet.query.all()
+
+    return render_template(
+        "my_medical_records.html",
+        records=records,
+        pets=pets
+    )
+
+@app.route("/delete-medical-record/<int:record_id>")
+def delete_medical_record(record_id):
+
+    record = MedicalRecord.query.get_or_404(record_id)
+
+    db.session.delete(record)
+    db.session.commit()
+
+    flash("Medical record deleted successfully", "success")
+
+    return redirect(url_for("vet_medical_records"))
+
+@app.route("/pet/<int:pet_id>/records")
+def pet_records(pet_id):
+
+    records = MedicalRecord.query.filter_by(pet_id=pet_id)\
+        .order_by(MedicalRecord.visit_date.desc()).all()
+
+    return render_template("my_medical_records.html", records=records, pets=[])
 
 if __name__ == '__main__': 
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

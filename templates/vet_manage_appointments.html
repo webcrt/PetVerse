@@ -72,52 +72,61 @@
 
                             <!-- Status -->
                             <td>
-                                {% if appt.status == 'pending' %}
-                                    <span class="badge bg-warning text-dark px-3 py-2">
-                                        Pending
-                                    </span>
-                                {% elif appt.status == 'approved' %}
-                                    <span class="badge bg-success px-3 py-2">
-                                        Approved
-                                    </span>
-                                {% elif appt.status == 'completed' %}
-                                    <span class="badge bg-primary px-3 py-2">
-                                        Completed
-                                    </span>
-                                {% elif appt.status == 'cancelled' %}
-                                    <span class="badge bg-danger px-3 py-2">
-                                        Cancelled
-                                    </span>
-                                {% endif %}
-                            </td>
+    {% if appt.status|lower == 'pending' %}
+        <span class="badge bg-warning text-dark px-3 py-2">
+            Pending
+        </span>
+
+    {% elif appt.status|lower == 'approved' %}
+        <span class="badge bg-success px-3 py-2">
+            Approved
+        </span>
+
+    {% elif appt.status|lower == 'completed' %}
+        <span class="badge bg-primary px-3 py-2">
+            Completed
+        </span>
+
+    {% elif appt.status|lower == 'cancelled' %}
+        <span class="badge bg-danger px-3 py-2">
+            Cancelled
+        </span>
+    {% endif %}
+</td>
 
                             <!-- Action Buttons -->
                             <td class="text-center">
 
-                                {% if appt.status == 'pending' %}
-                                    <a href="{{ url_for('approve_appointment', appointment_id=appt.id) }}"
-                                       class="btn btn-sm btn-success">
-                                        Approve
-                                    </a>
+    {% if appt.status == 'pending' %}
+        <a href="{{ url_for('approve_appointment', appointment_id=appt.id) }}"
+           class="btn btn-sm btn-success">
+            Approve
+        </a>
 
-                                    <a href="{{ url_for('cancel_appointment', appointment_id=appt.id) }}"
-                                       class="btn btn-sm btn-danger">
-                                        Reject
-                                    </a>
+        <a href="{{ url_for('cancel_vet_appointment', id=appt.id) }}"
+           class="btn btn-sm btn-danger">
+            Reject
+        </a>
 
-                                {% elif appt.status == 'approved' %}
-                                    <a href="{{ url_for('complete_appointment', appointment_id=appt.id) }}"
-                                       class="btn btn-sm btn-primary">
-                                        Mark Completed
-                                    </a>
+    {% elif appt.status == 'approved' %}
+        <a href="{{ url_for('complete_appointment', appointment_id=appt.id) }}"
+           class="btn btn-sm btn-primary">
+            Mark Completed
+        </a>
 
-                                {% else %}
-                                    <button class="btn btn-sm btn-outline-secondary" disabled>
-                                        No Action
-                                    </button>
-                                {% endif %}
+    {% elif appt.status|lower == 'completed' %}
+        <a href="{{ url_for('add_medical_record', pet_id=appt.pet.id) }}"
+           class="btn btn-sm btn-primary">
+            Add Medical Record
+        </a>
 
-                            </td>
+    {% else %}
+        <button class="btn btn-sm btn-outline-secondary" disabled>
+            No Action
+        </button>
+    {% endif %}
+
+</td>
 
                         </tr>
                         {% endfor %}
