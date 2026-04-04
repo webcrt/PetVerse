@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Verify OTP - Pet Care Connect{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow">
+            <div class="card-body text-center">
+
+                <h2 class="card-title mb-4">
+                    <i class="fas fa-shield-alt me-2"></i>Verify OTP
+                </h2>
+
+                <form method="POST">
+
+                    <!-- OTP BOXES -->
+                    <div class="mb-3">
+                        <label class="form-label">Enter OTP</label>
+
+                        <div class="d-flex justify-content-center gap-2">
+                            {% for i in range(6) %}
+                            <input type="text" maxlength="1"
+                                   class="form-control text-center otp-box"
+                                   style="width:50px; font-size:20px;"
+                                   required>
+                            {% endfor %}
+                        </div>
+
+                        <input type="hidden" name="otp" id="otp">
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-check me-2"></i>Verify
+                        </button>
+                    </div>
+
+                </form>
+
+                <!-- TIMER -->
+                <div class="mt-3">
+                    <small id="timer" class="text-danger"></small>
+                </div>
+
+                <div class="text-center mt-2">
+                    <a href="{{ url_for('forgot_password') }}">Resend OTP</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS -->
+<script>
+const inputs = document.querySelectorAll(".otp-box");
+const hiddenInput = document.getElementById("otp");
+
+// Auto move + combine OTP
+inputs.forEach((input, index) => {
+    input.addEventListener("input", () => {
+        if (input.value.length === 1 && index < inputs.length - 1) {
+            inputs[index + 1].focus();
+        }
+
+        let otp = "";
+        inputs.forEach(i => otp += i.value);
+        hiddenInput.value = otp;
+    });
+
+    input.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && input.value === "" && index > 0) {
+            inputs[index - 1].focus();
+        }
+    });
+});
+
+// TIMER (5 minutes)
+let timeLeft = 300;
+const timer = document.getElementById("timer");
+
+const countdown = setInterval(() => {
+    let minutes = Math.floor(timeLeft / 60);
+    let seconds = timeLeft % 60;
+
+    timer.innerHTML = `OTP expires in ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+    timeLeft--;
+
+    if (timeLeft < 0) {
+        clearInterval(countdown);
+        timer.innerHTML = "OTP expired!";
+    }
+}, 1000);
+</script>
+
+{% endblock %}

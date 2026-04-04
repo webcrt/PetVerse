@@ -1,5 +1,5 @@
 /* ===============================
-   Global Styles
+   GLOBAL STYLES
 ================================= */
 
 body {
@@ -15,301 +15,339 @@ a {
     text-decoration: none;
 }
 
-/* Buttons */
+/* Smooth UI feel */
+* {
+    transition: all 0.2s ease-in-out;
+}
+
+/* ===============================
+   BUTTONS
+================================= */
+
 .btn {
-    border-radius: 0.5rem;
+    border-radius: 0.6rem;
     padding: 0.6rem 1.2rem;
     font-weight: 500;
-    transition: all 0.2s ease-in-out;
 }
 
 .btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-/* Navbar */
-.navbar-brand {
-    font-weight: 700;
-    font-size: 1.25rem;
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
 }
 
 /* ===============================
-   Hero Section (Full Screen)
+   NAVBAR
+================================= */
+
+.navbar {
+    background: rgba(0, 123, 255, 0.95) !important;
+    backdrop-filter: blur(8px);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.3rem;
+}
+
+/* ===============================
+   HERO SECTION
 ================================= */
 
 .hero-section {
     background: url("../uploads/cat and dog.jpg") no-repeat center center;
     background-size: cover;
-    height: calc(100vh - 70px);
+    min-height: calc(100vh - 70px);
     display: flex;
     align-items: center;
     justify-content: center;
-    text-align: center;
     position: relative;
-    color: #fff;
     padding: 2rem;
+    text-align: center;
 }
 
-/* Darker overlay for better text visibility */
+/* DARK OVERLAY (FIXED) */
 .hero-section::before {
     content: "";
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.55);
+    inset: 0;
+    background: rgba(0,0,0,0.75);
     z-index: 1;
 }
 
 .hero-section > * {
     position: relative;
     z-index: 2;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    text-shadow: 0 2px 8px rgba(0,0,0,0.9);
 }
-/* ===============================
-   Glassy Feature Cards (Refactored)
-================================= */
 
-/* Card wrapper */
+/* ===============================
+   FEATURE CARDS (GLASS UI)
+================================= */
+.feature-title {
+    color: #ffffff;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.9);
+}
+
+.feature-desc {
+    color: #ffffff;
+    text-shadow: 0 3px 12px rgba(0,0,0,0.9);
+}
 .feature-card {
     position: relative;
-    border-radius: 1rem;
-    padding: 1.5rem;
-    text-align: center;
-    overflow: hidden; /* contain background overlay */
-    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
-    transition: transform 0.3s ease;
-    background: transparent; /* remove solid bg */
+    border-radius: 1.2rem;
+    padding: 1.8rem;
+    overflow: hidden;
+
+    /* ✅ PURE GLASS (NO BLACK) */
+    background: rgba(255, 255, 255, 0.06);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+
+    /* subtle glass border */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+
+    /* very soft shadow */
+    box-shadow: 
+        0 4px 20px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255,255,255,0.25);
+
+    transition: all 0.3s ease;
+}
+
+.feature-card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 60%;
+    height: 100%;
+
+    background: linear-gradient(
+        120deg,
+        rgba(255,255,255,0.2),
+        rgba(255,255,255,0.05)
+    );
+
+    transform: skewX(-25deg);
+    transition: 0.6s;
 }
 
 .feature-card:hover {
-    transform: translateY(-6px);
+    transform: translateY(-10px) scale(1.03);
+
+    box-shadow: 
+        0 12px 40px rgba(0, 0, 0, 0.5),
+        inset 0 1px 0 rgba(255,255,255,0.2);
 }
 
-/* Glassy background overlay */
+/* Glass effect */
 .feature-card::before {
     content: "";
     position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.15); /* translucent glass */
-    backdrop-filter: blur(12px) saturate(180%);
-    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    inset: 0;  /* lighter glass */  /* semi-dark glass */
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     border-radius: 1rem;
-    z-index: 0; /* stays behind content */
+    border: 1px solid rgba(255, 255, 255, 0.15); /* glass edge */
+    z-index: 0;
 }
 
-/* Solid content (text + icons + buttons) */
+/* Content */
 .feature-card > * {
     position: relative;
     z-index: 1;
-    opacity: 1 !important;   /* ensure no transparency */
-    color: #111;             /* force solid text */
 }
 
-/* Icon container with glass circle */
-.feature-card .icon-bg {
+/* Icon */
+.icon-bg {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 80px;
-    height: 80px;
+    width: 75px;
+    height: 75px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2); /* light glass effect */
-    backdrop-filter: blur(10px) saturate(180%);
-    -webkit-backdrop-filter: blur(10px) saturate(180%);
-    margin: 0 auto 1rem auto;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    margin: 0 auto 1rem;
+    background: rgba(255,255,255,0.2);
+    backdrop-filter: blur(10px);
 }
 
-/* Icons (solid color) */
 .feature-card i {
-    font-size: 2.5rem;
-    color: #007bff;
-    opacity: 1 !important;
+    font-size: 2rem;
 }
 
-/* Headings */
+/* TEXT FIX (IMPORTANT) */
 .feature-card h5 {
+    color: #ffffff;
     font-weight: 700;
-    color: #fff;
-    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    letter-spacing: 0.5px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+    margin-bottom: 0.6rem;
 }
 
-/* Paragraphs */
+
 .feature-card p {
-    font-weight: 600;
-    color: #f1f1f1;
+    color: #ffffff;              /* FULL WHITE (same as heading) */
+    font-weight: 600;            /* stronger */
+    font-size: 1rem;             /* slightly bigger */
+    line-height: 1.6;
+    margin-bottom: 1.2rem;
+
+    /* strong readability */
+    text-shadow: 0 3px 8px rgba(0,0,0,0.9);
+
+    /* OPTIONAL: lift effect (feels outside glass) */
+    position: relative;
+    z-index: 2;
 }
-
-
 /* ===============================
-   Buttons (Red Text on Colored Backgrounds)
+   BUTTON COLORS
 ================================= */
 
-/* Shared style */
-.feature-card .btn {
-    font-weight: 600;
-    border: none;
-    border-radius: 0.6rem;
-    padding: 0.6rem 1.2rem;
-}
-
-/* Primary (Blue) */
-.btn-primary {
-    background-color: #007bff;
-    color: #fff !important;  /* White text */
-}
-.btn-primary:hover {
-    background-color: #0069d9;
-    color: #fff !important;
-}
-
-/* Success (Green) */
-.btn-success {
-    background-color: #28a745;
-    color: #fff !important;  /* White text */
-}
-.btn-success:hover {
-    background-color: #218838;
-    color: #fff !important;
-}
-
-/* Warning (Yellow) */
-.btn-warning {
-    background-color: #ffc107;
-    color: #fff !important;  /* White text */
-}
-.btn-warning:hover {
-    background-color: #e0a800;
-    color: #fff !important;
-}
+.btn-primary { background-color: #007bff; color: #fff !important; }
+.btn-success { background-color: #28a745; color: #fff !important; }
+.btn-warning { background-color: #ffc107; color: #fff !important; }
+.btn-info    { background-color: #17a2b8; color: #fff !important; }
 
 /* ===============================
-   Pet Cards
+   PET CARDS
 ================================= */
 
 .pet-card {
-    border: none;
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    transition: transform 0.2s ease-in-out;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
 }
 
 .pet-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    transform: translateY(-6px);
 }
 
 .pet-image {
     height: 220px;
     object-fit: cover;
-    border-top-left-radius: 0.75rem;
-    border-top-right-radius: 0.75rem;
 }
 
 /* ===============================
-   Dashboard & Stats
+   DASHBOARD
 ================================= */
 
 .dashboard-card {
-    border: none;
+    height: 100%;
     border-radius: 1rem;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     padding: 1.5rem;
     background: white;
-    margin-bottom: 1.5rem;
-}
-
-.stats-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    border-radius: 1rem;
-    padding: 2rem;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-}
-
-.stats-icon {
-    font-size: 2.5rem;
-    opacity: 0.5; /* More transparent */
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1);
 }
 
 /* ===============================
-   Chat Styles
+   FOOTER (FIXED - DARK)
 ================================= */
 
-.chat-container {
-    height: 400px;
-    overflow-y: auto;
-    border-radius: 0.75rem;
-    padding: 1rem;
-    background-color: #fff;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+footer {
+    background: #1c1f23;
+    color: #bbb;
+    text-align: center;
+    padding: 1.5rem 0;
+    margin-top: 2rem;
 }
 
-.message {
-    margin-bottom: 1rem;
-    padding: 0.6rem 1rem;
-    border-radius: 1rem;
-    max-width: 75%;
-    font-size: 0.95rem;
+footer strong {
+    color: #fff;
 }
 
-.user-message {
-    background: #007bff;
-    color: white;
-    margin-left: auto;
-    text-align: right;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-.bot-message {
-    background: #f1f3f5;
-    border: 1px solid #dee2e6;
-    margin-right: auto;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+footer small {
+    color: #888;
 }
 
 /* ===============================
-   Alerts
+   ALERTS
 ================================= */
 
 .alert {
     border-radius: 0.75rem;
-    padding: 1rem 1.5rem;
-    font-weight: 500;
 }
 
 /* ===============================
-   Responsive
+   RESPONSIVE
 ================================= */
 
 @media (max-width: 768px) {
     .hero-section {
-        height: auto;
+        min-height: auto;
         padding: 3rem 1.5rem;
-        text-align: center;
     }
 
     .feature-card {
-        margin-bottom: 1.5rem;
-    }
-
-    .feature-card img {
-        width: 70px;
-        height: 70px;
-    }
-
-    .message {
-        max-width: 90%;
+        margin-bottom: 1rem;
     }
 }
-/* ===== FIX: Dropdown options visibility ===== */
 
-.form-select {
-    color: #212529 !important;
-    background-color: #fff !important;
-}
+/* ===============================
+   FORM FIX
+================================= */
 
+.form-select,
 .form-select option {
     color: #212529 !important;
     background-color: #fff !important;
+}
+/* CONTACT SECTION */
+.contact-section {
+    background: #1c1f23; /* same as footer for consistency */
+}
+
+.contact-card {
+    border-radius: 1rem;
+
+    /* glass effect */
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff;
+}
+
+.contact-card i {
+    color: #0d6efd;
+}
+
+.stats-card {
+    border-radius: 1rem;
+    background: linear-gradient(135deg, #1e90ff, #4facfe);
+    color: white;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    transition: 0.3s ease;
+}
+
+.stats-card:hover {
+    transform: translateY(-6px) scale(1.02);
+}
+
+/* Icon circle */
+.stats-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+/* Number */
+.stats-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 10px 0 5px;
+}
+
+/* Label */
+.stats-label {
+    font-size: 0.95rem;
+    opacity: 0.9;
 }

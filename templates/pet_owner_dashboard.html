@@ -12,15 +12,22 @@
 </div>
 
 <div class="row mb-4">
+
+    <!-- Stats -->
     <div class="col-md-3">
-        <div class="card stats-card text-center">
-            <div class="card-body">
-                <i class="fas fa-paw stats-icon"></i>
-                <h3 class="mt-2">{{ pets|length }}</h3>
-                <p class="mb-0">Your Pets</p>
-            </div>
+    <div class="card stats-card text-center p-4">
+
+        <div class="stats-icon-wrapper mb-3">
+            <i class="fas fa-paw"></i>
         </div>
+
+        <h2 class="stats-number">{{ pets|length }}</h2>
+        <p class="stats-label">Your Pets</p>
+
     </div>
+</div>
+
+    <!-- AI -->
     <div class="col-md-3">
         <div class="card dashboard-card text-center">
             <div class="card-body">
@@ -32,6 +39,8 @@
             </div>
         </div>
     </div>
+
+    <!-- Add Pet -->
     <div class="col-md-3">
         <div class="card dashboard-card text-center">
             <div class="card-body">
@@ -43,25 +52,28 @@
             </div>
         </div>
     </div>
+
+    <!-- Browse -->
     <div class="col-md-3">
-    <div class="card dashboard-card text-center">
-        <div class="card-body">
-            <i class="fas fa-search fa-3x text-info mb-3"></i>
-            <h5>Browse</h5>
+        <div class="card dashboard-card text-center">
+            <div class="card-body">
+                <i class="fas fa-search fa-3x text-info mb-3"></i>
+                <h5>Browse</h5>
 
-            <div class="d-grid gap-2 mt-3">
-                <a href="{{ url_for('browse_pets') }}" class="btn btn-info">
-                    <i class="fas fa-paw me-2"></i>Pets
-                </a>
+                <div class="d-grid gap-2 mt-3">
+                    <a href="{{ url_for('browse_pets') }}" class="btn btn-info">
+                        <i class="fas fa-paw me-2"></i>Pets
+                    </a>
 
-                <a href="{{ url_for('browse_vet_slots') }}" class="btn btn-outline-info">
-                    <i class="fas fa-stethoscope me-2"></i>Veterinary
-                </a>
+                    <a href="{{ url_for('browse_vet_slots') }}" class="btn btn-outline-info">
+                        <i class="fas fa-stethoscope me-2"></i>Veterinary
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</div>
 
+</div> <!-- ✅ IMPORTANT: CLOSE ROW -->
 
 <div class="row mb-4">
     <div class="col-md-3">

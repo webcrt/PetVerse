@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from flask_migrate import Migrate  # ✅ migrations
 from email_utils import send_vaccination_reminder
+from werkzeug.security import check_password_hash
 
 # ----------------------------------------------------
 # Import project modules
@@ -36,6 +37,7 @@ from email_utils import (
     send_application_response_notification,
     send_feeding_reminder,
     send_order_confirmation,
+    send_otp_email
 )
 from scheduler import (
     scheduler,
@@ -271,7 +273,8 @@ def veterinary_dashboard():
         'veterinary_dashboard.html',
         user=user,
         slots=appointment_slots,
-        appointments=appointments
+        appointments=appointments,
+        today=date.today() 
     )
 
 @app.route('/complete-appointment/<int:appointment_id>')
@@ -349,6 +352,13 @@ def delete_slot(slot_id):
         flash("Unauthorized action!", "danger")
         return redirect(url_for('veterinary_dashboard'))
 
+    # ✅ STEP 1: Delete all related appointments
+    appointments = VetAppointment.query.filter_by(slot_id=slot.id).all()
+
+    for appt in appointments:
+        db.session.delete(appt)
+
+    # ✅ STEP 2: Delete slot
     db.session.delete(slot)
     db.session.commit()
 
@@ -1617,6 +1627,71 @@ def pet_records(pet_id):
         .order_by(MedicalRecord.visit_date.desc()).all()
 
     return render_template("my_medical_records.html", records=records, pets=[])
+
+import random
+from datetime import datetime, timedelta
+
+@app.route('/forgot-password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        user = User.query.filter_by(email=email).first()
+
+        if user:
+            otp = str(random.randint(100000, 999999))
+
+            user.otp = otp
+            user.otp_expiry = datetime.now() + timedelta(minutes=5)
+
+            db.session.commit()
+
+            # ✅ SEND EMAIL USING YOUR SYSTEM
+            send_otp_email(email, otp)
+
+            flash("OTP sent to your registered email!", "success")
+            return redirect(url_for('verify_otp', email=email))
+
+        else:
+            flash("Email not found!", "danger")
+
+    return render_template('forgot_password.html')
+
+@app.route('/verify-otp/<email>', methods=['GET', 'POST'])
+def verify_otp(email):
+    user = User.query.filter_by(email=email).first()
+
+    if request.method == 'POST':
+        entered_otp = request.form['otp']
+
+        if user and user.otp == entered_otp:
+            if datetime.now() < user.otp_expiry:
+                return redirect(url_for('reset_password', email=email))
+            else:
+                flash("OTP expired!", "danger")
+        else:
+            flash("Invalid OTP!", "danger")
+
+    return render_template('verify_otp.html', email=email)
+
+from werkzeug.security import generate_password_hash
+
+@app.route('/reset-password/<email>', methods=['GET', 'POST'])
+def reset_password(email):
+    user = User.query.filter_by(email=email).first()
+
+    if request.method == 'POST':
+        new_password = request.form['password']
+
+        user.password_hash = generate_password_hash(new_password)  # ✅ FIX
+        user.otp = None
+        user.otp_expiry = None
+
+        db.session.commit()
+
+        flash("Password updated successfully!", "success")
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html')
 
 if __name__ == '__main__': 
     app.run(host='0.0.0.0', port=5000, debug=True, use_reloader=False)

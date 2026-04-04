@@ -221,3 +221,21 @@ Pet verse Team
     """
 
     return send_email(owner_email, subject, text)
+
+def send_otp_email(user_email: str, otp: str):
+    subject = "🔐 Password Reset OTP - PetVerse"
+
+    text = f"""
+Hello,
+
+Your OTP for password reset is: {otp}
+
+This OTP is valid for 5 minutes.
+
+If you did not request this, please ignore.
+
+Regards,
+PetVerse Team
+    """
+
+    return send_email(user_email, subject, text)

@@ -13,6 +13,8 @@ class User(db.Model):
     phone = db.Column(db.String(20))
     address = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    otp = db.Column(db.String(6), nullable=True)
+    otp_expiry = db.Column(db.DateTime, nullable=True)
     
     # Relationships
     pets = db.relationship('Pet', backref='owner', lazy=True)
