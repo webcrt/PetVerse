@@ -16,7 +16,7 @@ It supports multiple users:
 
 The system uses AI, automation, and event-driven architecture to provide a seamless and modern pet care experience.
 
-🚀 Key Features
+ Key Features
 
 - Pet Owner Module
   
