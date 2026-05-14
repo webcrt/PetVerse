@@ -1,12 +1,3 @@
-<img width="1892" height="907" alt="landing page" src="https://github.com/user-attachments/assets/435a11e6-5953-48c1-913e-91b17c9fe220" />
-<img width="1920" height="1540" alt="dashboard" src="https://github.com/user-attachments/assets/733470b9-f0cc-4362-9a7d-ab7e4485effd" />
-<img width="1358" height="865" alt="ai assistant" src="https://github.com/user-attachments/assets/a203eb82-1913-48fc-8d35-c754ad4022cc" />
-<img width="1902" height="910" alt="adoption" src="https://github.com/user-attachments/assets/d06a4bdc-1c43-4c6c-b427-91ca6ca5634a" />
-<img width="1287" height="720" alt="appointment" src="https://github.com/user-attachments/assets/c0662a9a-49ff-4533-aac5-b08c032c9bde" />
-<img width="1903" height="907" alt="product" src="https://github.com/user-attachments/assets/ec7a81e8-033c-4773-b1b0-cc1b956bd6a9" />
-<img width="1877" height="901" alt="petprofile" src="https://github.com/user-attachments/assets/64cf1902-8100-4a2f-b225-ea936859c071" />
-<img width="1720" height="907" alt="medical records" src="https://github.com/user-attachments/assets/375e17f1-f615-4ee4-aff2-2ef8c4440b74" />
-
 
 # PetVerse – All-in-One Smart Pet Care Solution
 
@@ -331,3 +322,11 @@ MCA Student | Python & Full Stack Developer
 
 This project is developed for academic and educational purposes.
 
+<img width="1892" height="907" alt="landing page" src="https://github.com/user-attachments/assets/435a11e6-5953-48c1-913e-91b17c9fe220" />
+<img width="1920" height="1540" alt="dashboard" src="https://github.com/user-attachments/assets/733470b9-f0cc-4362-9a7d-ab7e4485effd" />
+<img width="1358" height="865" alt="ai assistant" src="https://github.com/user-attachments/assets/a203eb82-1913-48fc-8d35-c754ad4022cc" />
+<img width="1902" height="910" alt="adoption" src="https://github.com/user-attachments/assets/d06a4bdc-1c43-4c6c-b427-91ca6ca5634a" />
+<img width="1287" height="720" alt="appointment" src="https://github.com/user-attachments/assets/c0662a9a-49ff-4533-aac5-b08c032c9bde" />
+<img width="1903" height="907" alt="product" src="https://github.com/user-attachments/assets/ec7a81e8-033c-4773-b1b0-cc1b956bd6a9" />
+<img width="1877" height="901" alt="petprofile" src="https://github.com/user-attachments/assets/64cf1902-8100-4a2f-b225-ea936859c071" />
+<img width="1720" height="907" alt="medical records" src="https://github.com/user-attachments/assets/375e17f1-f615-4ee4-aff2-2ef8c4440b74" />
